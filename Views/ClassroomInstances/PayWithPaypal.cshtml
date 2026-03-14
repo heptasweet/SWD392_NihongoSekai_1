@@ -1,0 +1,77 @@
+﻿@model JapaneseLearningPlatform.Data.ViewModels.ClassroomPaymentVM
+
+@{
+    ViewData["Title"] = "Xác nhận thanh toán";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h3 class="card-title text-center text-success mb-4">
+                        <i class="bi bi-credit-card-fill me-2"></i>Xác nhận thanh toán
+                    </h3>
+
+                    <div class="mb-3">
+                        <p><strong>Tên lớp học:</strong> @Model.Title</p>
+                        <p>
+                            <strong>Giá:</strong>
+                            <span class="text-danger fw-bold">@Model.Price @Model.Currency</span>
+                        </p>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Sau khi xác nhận thanh toán thành công, bạn sẽ có toàn quyền truy cập lớp học.
+                        <br />
+                        <strong>Giao dịch này không hoàn lại.</strong>
+                    </div>
+
+                    <div class="text-center mt-4 mb-3">
+                        <div id="paypal-button"></div>
+                    </div>
+
+                    <div class="text-center">
+                        <a href="javascript:history.back()" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left-circle me-1"></i> Trở về
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://www.paypalobjects.com/api/checkout.js"></script>
+    <script>
+        paypal.Button.render({
+            env: 'sandbox',
+            client: {
+                sandbox: 'AcKRtgL4i68EZ2ZYuYUx3ilihAg2YhL5dtF_m19A8MjBWVOn6ewNS4M_uV8gA3xi98zTcUq38gUHbVFx'
+            },
+            locale: 'en_US',
+            style: {
+                size: 'small',
+                color: 'gold',
+                shape: 'pill'
+            },
+            payment: function (data, actions) {
+                return actions.payment.create({
+                    transactions: [{
+                        amount: {
+                            total: '@Model.Price',
+                            currency: 'USD'
+                        }
+                    }]
+                });
+            },
+            onAuthorize: function (data, actions) {
+                return actions.payment.execute().then(function () {
+                    window.location.href = '@Url.Action("CompletePayment", "ClassroomInstances", new { id = Model.InstanceId })';
+                });
+            }
+        }, '#paypal-button');
+    </script>
+}
