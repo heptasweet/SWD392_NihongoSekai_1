@@ -1,0 +1,935 @@
+﻿@using JapaneseLearningPlatform.Models.Partner
+@using JapaneseLearningPlatform.Data.Enums
+@using JapaneseLearningPlatform.Helpers
+@model IEnumerable<PartnerProfile>
+
+@{
+    ViewData["Title"] = "Đơn ứng tuyển đối tác";
+    var filter = (PartnerStatus)(ViewData["CurrentFilter"] ?? PartnerStatus.Pending);
+
+    // Base dataset by status
+    var allItems = Model.Where(p => p.Status == filter);
+
+    // Stats for Pending tab
+    var pendingAll = Model.Where(p => p.Status == PartnerStatus.Pending);
+    var todayLocal = DateTime.Now.Date;
+    var pendingToday = pendingAll.Count(p => p.CreatedAt.ToLocalTime().Date == todayLocal);
+
+    // Read query params
+    var expParam = Context.Request.Query["exp"].ToString();
+    var specParam = Context.Request.Query["spec"].ToString();
+    var dateParam = Context.Request.Query["dateRange"].ToString();
+    var page = int.TryParse(Context.Request.Query["page"], out var pg) ? pg : 1;
+
+    // Apply filters
+    if (!string.IsNullOrEmpty(expParam) &&
+        Enum.TryParse<YearsOfExperience>(expParam, out var expVal))
+    {
+        allItems = allItems.Where(p => p.YearsOfExperience == expVal);
+    }
+
+    if (!string.IsNullOrEmpty(specParam) &&
+        Enum.TryParse<SpecializationType>(specParam, out var specVal))
+    {
+        allItems = allItems.Where(p => p.Specializations.Any(s => s.Specialization == specVal));
+    }
+
+    if (!string.IsNullOrEmpty(dateParam))
+    {
+        if (filter == PartnerStatus.Pending)
+        {
+            if (dateParam == "today")
+            {
+                allItems = allItems.Where(p => p.CreatedAt.ToLocalTime().Date == todayLocal);
+            }
+            else if (int.TryParse(dateParam, out var days))
+            {
+                allItems = allItems.Where(p => p.CreatedAt.ToLocalTime().Date >= todayLocal.AddDays(-days));
+            }
+        }
+        else // Approved
+        {
+            if (dateParam == "today")
+            {
+                allItems = allItems.Where(p =>
+                    p.DecisionAt.HasValue &&
+                    p.DecisionAt.Value.ToLocalTime().Date == todayLocal);
+            }
+            else if (int.TryParse(dateParam, out var days))
+            {
+                allItems = allItems.Where(p =>
+                    p.DecisionAt.HasValue &&
+                    p.DecisionAt.Value.ToLocalTime().Date >= todayLocal.AddDays(-days));
+            }
+        }
+    }
+
+    // Pagination
+    int pageSize = 10;
+    int totalCount = allItems.Count();
+    int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+    var items = allItems
+                       .Skip((page - 1) * pageSize)
+                       .Take(pageSize)
+                       .ToList();
+}
+
+@section Styles {
+    <!-- Google Fonts & Bootstrap Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet" />
+
+    <style>
+        /* === BODY & BACKGROUND PETALS === */
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background: #f9f5f2 url('/images/pattern-wave.png') center/200px repeat;
+            position: relative;
+            overflow-x: hidden;
+        }
+        /* Sakura petals (subtle, few) */
+        .petal {
+            position: fixed;
+            top: -10px;
+            width: 16px;
+            height: 16px;
+            background: url('/images/petal.svg') no-repeat center/contain;
+            opacity: 0.7;
+            animation: fall linear infinite;
+        }
+
+        @@keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(360deg);
+            }
+        }
+
+        /* === CONTAINER === */
+        .container {
+            margin-top: 4rem;
+            margin-bottom: 4rem;
+        }
+
+        h1 {
+            text-align: center;
+            color: #a32a2a;
+            margin-bottom: 2rem;
+        }
+
+        /* === STAT CARDS === */
+        .stat-card {
+            border-radius: 1rem; /* bo góc to hơn */
+            padding: 0; /* bỏ padding dư */
+            overflow: hidden;
+            background: #fff;
+            transition: transform .2s, box-shadow .2s;
+        }
+
+            .stat-card .card-body {
+                padding: 1rem; /* đưa padding vào card-body */
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .stat-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            }
+
+
+        /* === FILTER FORM === */
+        .hover-dropdown {
+            position: relative;
+        }
+
+            .hover-dropdown .dropdown-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                max-height: 180px;
+                overflow-y: auto;
+                background: #fff;
+                border: 1px solid #ddd;
+                border-radius: 0.5rem;
+                box-shadow: 0 .5rem 1rem rgba(0,0,0,0.1);
+            }
+
+            .hover-dropdown:hover .dropdown-menu {
+                display: block;
+            }
+
+            .hover-dropdown .dropdown-item:hover {
+                background: #fef0f0;
+                color: #a32a2a;
+            }
+
+        .apply-btn {
+            background-color: #a32a2a;
+            border-color: #a32a2a;
+        }
+
+            .apply-btn:hover {
+                background-color: #8b2424;
+            }
+
+        /* === TABLE === */
+        .table-wrapper {
+            background: #fff;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+        }
+
+            .table-wrapper table {
+                border: none;
+            }
+
+            .table-wrapper thead th {
+                background: #fef2f2;
+                color: #a32a2a;
+                border-bottom: none;
+            }
+
+            .table-wrapper tbody tr {
+                transition: background .2s, transform .2s;
+            }
+
+                .table-wrapper tbody tr:hover {
+                    background: #fff5f5;
+                    transform: translateY(-1px);
+                }
+
+
+        .badge-special {
+            background: #ffe4ec !important;
+            color: #d6336c !important;
+            padding: .25em .5em;
+            border-radius: .5rem;
+        }
+
+
+        /* === FOOTER SPACING === */
+        .pagination {
+            margin-top: 1.5rem;
+            justify-content: center;
+        }
+
+
+        /* Make apply-btn match the style of the "Xóa bộ lọc" button on Users page */
+        .apply-btn {
+            background-color: transparent; /* trong suốt */
+            color: #a32a2a; /* chữ đỏ */
+            border: 1px solid #a32a2a; /* viền đỏ */
+            border-radius: 0.5rem; /* bo góc tương tự */
+            padding: 0.5rem 1.25rem; /* chiều cao & padding */
+            font-weight: 600; /* đậm như nút Clear */
+            transition: background-color .2s, color .2s;
+            white-space: nowrap;
+        }
+
+            .apply-btn:hover,
+            .apply-btn:focus {
+                background-color: #a32a2a; /* nền đỏ khi hover */
+                color: #fff; /* chữ trắng */
+                text-decoration: none;
+            }
+
+        /* Container chung cho filter + nút */
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+            background: #fff;
+            padding: .75rem 1rem;
+            border-radius: .75rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+
+            /* Mỗi dropdown và nút Apply cùng chiều cao */
+            .filter-bar .hover-dropdown,
+            .filter-bar .apply-btn {
+                flex: 1 1 0;
+                min-width: 150px;
+                height: 2.75rem;
+            }
+
+                /* Dropdown giữ nguyên style Bootstrap, chỉ bo góc và background */
+                .filter-bar .hover-dropdown .btn {
+                    height: 100%;
+                    border-radius: .5rem;
+                    background: #f8f9fa;
+                    text-align: left;
+                }
+
+            /* Style nút Apply nhỏ gọn như nút “Xóa bộ lọc” bên Users page */
+            .filter-bar .apply-btn {
+                background: transparent;
+                color: #a32a2a;
+                border: 1px solid #a32a2a;
+                border-radius: .5rem;
+                padding: 0; /* padding trên-xuống do height cố định */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 600;
+                transition: background-color .2s, color .2s, transform .1s;
+            }
+
+                /* Hover & focus state */
+                .filter-bar .apply-btn:hover,
+                .filter-bar .apply-btn:focus {
+                    background-color: #a32a2a;
+                    color: #fff;
+                    transform: translateY(-1px);
+                    text-decoration: none;
+                }
+
+                /* Nếu cần icon bên trong nút */
+                .filter-bar .apply-btn i {
+                    margin-right: .5rem;
+                    font-size: 1.1rem;
+                }
+
+        /* ===== BASIC LAYOUT ===== */
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background: #f9f5f2 url('/images/pattern-wave.png') center/200px repeat;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        h1 {
+            text-align: center;
+            color: #a32a2a;
+            margin-bottom: 2.5rem;
+        }
+
+        /* ===== NAV & STATS ===== */
+        .btn-group a {
+            min-width: 120px;
+        }
+
+        .stat-card {
+            border-radius: 0.75rem;
+            background: #fff;
+            transition: transform .2s, box-shadow .2s;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            }
+
+        /* ===== FILTER BAR ===== */
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            background: #fff;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+            .filter-bar .hover-dropdown,
+            .filter-bar .apply-btn {
+                flex: 1 1 150px;
+                height: 2.75rem;
+            }
+
+                /* dropdown button */
+                .filter-bar .hover-dropdown .btn {
+                    height: 100%;
+                    width: 100%;
+                    background: #f8f9fa;
+                    border: 1px solid #ddd;
+                    border-radius: 0.5rem;
+                    text-align: left;
+                    padding: 0 .75rem;
+                }
+
+            /* apply button */
+            .filter-bar .apply-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: transparent;
+                color: #a32a2a;
+                border: 1px solid #a32a2a;
+                border-radius: 0.5rem;
+                font-weight: 600;
+                transition: background .2s, color .2s, transform .1s;
+            }
+
+                .filter-bar .apply-btn:hover {
+                    background: #a32a2a;
+                    color: #fff;
+                    transform: translateY(-1px);
+                    text-decoration: none;
+                }
+
+        /* ===== TABLE ===== */
+        .table-wrapper {
+            background: #fff;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+            .table-wrapper table {
+                margin: 0;
+            }
+
+            .table-wrapper thead th {
+                background: #fde2e2;
+                color: #a32a2a;
+                border: none;
+                font-weight: 600;
+            }
+
+            .table-wrapper tbody tr:nth-child(odd) {
+                background: #fff5f5;
+            }
+
+            .table-wrapper tbody tr:hover {
+                background: #ffecec;
+                transform: translateY(-1px);
+                transition: background .2s, transform .2s;
+            }
+
+            .table-wrapper td, .table-wrapper th {
+                vertical-align: middle;
+            }
+
+        /* badge */
+        .badge-special {
+            background: #fde2e2 !important;
+            color: #a32a2a !important;
+        }
+
+        /* pagination */
+        .pagination {
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+            .pagination .page-link {
+                border-radius: .5rem;
+                margin: 0 .25rem;
+            }
+
+        /* make modals a bit more spacious */
+        .modal-content {
+            border-radius: .75rem;
+        }
+
+    </style>
+}
+
+
+<div class="container">
+    <h1>@ViewData["Title"]</h1>
+
+    @* Pending stats *@    
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card border-0 p-3">
+                <div class="card-body">
+                    <div>
+                        <small class="text-muted">Tổng đơn chờ</small>
+                        <h4>@pendingAll.Count()</h4>
+                    </div>
+                    <i class="bi bi-hourglass-split fs-2 text-danger"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card border-0 p-3">
+                <div class="card-body">
+                    <div>
+                        <small class="text-muted">Chờ hôm nay</small>
+                        <h4>@pendingToday</h4>
+                    </div>
+                    <i class="bi bi-calendar-day fs-2 text-warning"></i>
+                </div>
+            </div>
+        </div>
+    </div>    
+
+    @* Tabs *@
+    <div class="d-flex justify-content-center mb-4">
+        <div class="btn-group shadow-sm">
+            <a asp-action="PartnerApplications" asp-route-filter="Pending"
+               class="btn @(filter == PartnerStatus.Pending ? "btn-danger" : "btn-outline-secondary")">
+                Chờ duyệt
+            </a>
+            <a asp-action="PartnerApplications" asp-route-filter="Approved"
+               class="btn @(filter == PartnerStatus.Approved ? "btn-success" : "btn-outline-secondary")">
+                Đã duyệt
+            </a>
+        </div>
+    </div>
+
+@* Bộ lọc *@
+    <form method="get" asp-controller="Admin" asp-action="PartnerApplications" id="filterForm" class="row g-3 mb-4">
+        <input type="hidden" name="filter" value="@filter" />
+        <input type="hidden" name="exp" id="expInput" value="@expParam" />
+        <input type="hidden" name="spec" id="specInput" value="@specParam" />
+        <input type="hidden" name="dateRange" id="dateInput" value="@dateParam" />
+
+        <!-- Kinh nghiệm -->
+        <div class="col-md-3 hover-dropdown">
+            <label class="form-label">Kinh nghiệm</label>
+            <button type="button"
+                    class="btn btn-light dropdown-toggle w-100 text-start"
+                    data-bs-toggle="dropdown">
+                @(string.IsNullOrEmpty(expParam)
+                                ? "Tất cả"
+                                : ((YearsOfExperience)Enum.Parse(typeof(YearsOfExperience), expParam))
+                                .GetDisplayName())
+            </button>
+            <ul class="dropdown-menu w-100">
+                <li>
+                    <a class="dropdown-item exp-item @(string.IsNullOrEmpty(expParam) ? "active" : "")"
+                       data-val="">
+                        Tất cả
+                    </a>
+                </li>
+                @foreach (var e in Enum.GetValues(typeof(YearsOfExperience)).Cast<YearsOfExperience>())
+                {
+                    var sel = expParam == e.ToString() ? "active" : "";
+                    <li>
+                        <a class="dropdown-item exp-item @sel"
+                           data-val="@e">
+                            @e.GetDisplayName()
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+
+        <!-- Chuyên môn -->
+        <div class="col-md-3 hover-dropdown">
+            <label class="form-label">Chuyên môn</label>
+            <button type="button"
+                    class="btn btn-light dropdown-toggle w-100 text-start"
+                    data-bs-toggle="dropdown">
+                @(string.IsNullOrEmpty(specParam)
+                                ? "Tất cả"
+                                : ((SpecializationType)Enum.Parse(typeof(SpecializationType), specParam))
+                                .GetDisplayName())
+            </button>
+            <ul class="dropdown-menu w-100">
+                <li>
+                    <a class="dropdown-item spec-item @(string.IsNullOrEmpty(specParam) ? "active" : "")"
+                       data-val="">
+                        Tất cả
+                    </a>
+                </li>
+                @foreach (var s in Enum.GetValues(typeof(SpecializationType)).Cast<SpecializationType>())
+                {
+                    var sel = specParam == s.ToString() ? "active" : "";
+                    <li>
+                        <a class="dropdown-item spec-item @sel"
+                           data-val="@s">
+                            @s.GetDisplayName()
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+
+        <!-- Ngày gửi / quyết định -->
+        <div class="col-md-3 hover-dropdown">
+            <label class="form-label">
+                @(filter == PartnerStatus.Pending ? "Ngày gửi" : "Ngày quyết định")
+            </label>
+            <button type="button"
+                    class="btn btn-light dropdown-toggle w-100 text-start"
+                    data-bs-toggle="dropdown">
+                @(string.IsNullOrEmpty(dateParam)
+                                ? "Tất cả"
+                                : dateParam == "today" ? "Hôm nay"
+                                : dateParam == "3" ? "3 ngày qua"
+                                : dateParam == "7" ? "7 ngày qua"
+                                : dateParam)
+            </button>
+            <ul class="dropdown-menu w-100">
+                <li>
+                    <a class="dropdown-item date-item @(string.IsNullOrEmpty(dateParam) ? "active" : "")"
+                       data-val="">
+                        Tất cả
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item date-item @(dateParam == "today" ? "active" : "")"
+                       data-val="today">
+                        Hôm nay
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item date-item @(dateParam == "3" ? "active" : "")"
+                       data-val="3">
+                        3 ngày qua
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item date-item @(dateParam == "7" ? "active" : "")"
+                       data-val="7">
+                        7 ngày qua
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Submit -->
+        <div class="col-md-3 d-grid">
+            <button type="submit" class="btn apply-btn w-100">Áp dụng lọc</button>
+        </div>
+    </form>
+
+    @if (!items.Any())
+    {
+        <div class="alert alert-info">
+            Không có đơn ứng tuyển nào phù hợp tiêu chí.
+        </div>
+    }
+    else
+    {
+        <table class="table table-striped table-hover bg-white shadow-sm rounded">
+            <thead class="table-light">
+                <tr>
+                    <th>Họ và tên</th>
+                    <th>Email</th>
+                    <th>Kinh nghiệm</th>
+                    <th>@(filter == PartnerStatus.Pending ? "Ngày gửi" : "Ngày quyết định")</th>
+                    <th>Chuyên môn</th>
+                    <th class="text-center">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in items)
+                {
+                    var specs = p.Specializations.Select(sp => sp.Specialization).ToList();
+                    var shown = specs.Take(2).ToList();
+                    var extra = specs.Count - shown.Count();
+                    <tr>
+                        <td>@p.User.FullName</td>
+                        <td>@p.User.Email</td>
+                        <td>@p.YearsOfExperience.GetDisplayName()</td>
+                        <td>
+                            @(filter == PartnerStatus.Pending
+                                                ? p.CreatedAt.ToString("yyyy-MM-dd")
+                                                : p.DecisionAt?.ToString("yyyy-MM-dd") ?? "-")
+                </td>
+                <td>
+                    @foreach (var sp in shown)
+                            {
+                                <span class="badge-special me-1">@sp.GetDisplayName()</span>
+                            }
+                            @if (extra > 0)
+                            {
+                                <span class="badge-special"
+                                      data-bs-toggle="tooltip"
+                                      title="@string.Join(", ", specs.Skip(2).Select(x => x.GetDisplayName()))">
+                                    +@extra
+                                </span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <a asp-action="ReviewPartner" asp-route-id="@p.Id"
+                               class="btn btn-sm btn-outline-info me-1">Xem</a>
+
+                            @if (filter == PartnerStatus.Pending)
+                            {
+                                <!-- Phê duyệt -->
+                                <button type="button"
+                                        class="btn btn-sm btn-success me-1"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#approveModal-@p.Id">
+                                    Phê duyệt
+                                </button>
+                                <!-- Từ chối -->
+                                <button type="button"
+                                        class="btn btn-sm btn-danger"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#rejectModal-@p.Id">
+                                    Từ chối
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                }
+                
+            </tbody>
+        </table>
+        }
+    </div>
+
+    @* Pagination *@
+    @if (totalPages > 1)
+    {
+        <nav>
+            <ul class="pagination">
+                <li class="page-item @(page == 1 ? "disabled" : "")">
+                    <a class="page-link" href="?filter=@filter&page=@(page - 1)&exp=@expParam&spec=@specParam&dateRange=@dateParam">«</a>
+                </li>
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    <li class="page-item @(i == page ? "active" : "")">
+                        <a class="page-link" href="?filter=@filter&page=@i&exp=@expParam&spec=@specParam&dateRange=@dateParam">@i</a>
+                    </li>
+                }
+                <li class="page-item @(page == totalPages ? "disabled" : "")">
+                    <a class="page-link" href="?filter=@filter&page=@(page + 1)&exp=@expParam&spec=@specParam&dateRange=@dateParam">»</a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>
+
+@foreach (var p in items)
+{
+    <!-- Modal Phê duyệt -->
+    <div class="modal fade" id="approveModal-@p.Id" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <form asp-action="ApprovePartner" asp-controller="Admin" method="post" class="modal-content">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="partnerId" value="@p.Id" />
+
+                <div class="modal-header">
+                    <h5 class="modal-title text-success">
+                        <i class="bi bi-check-circle-fill"></i> Soạn thư phê duyệt
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- 1) Chủ đề -->
+                    <div class="mb-3">
+                        <label class="form-label">Chủ đề thư</label>
+                        <input type="text" name="subject" class="form-control"
+                               value="🎉 Yêu cầu Đối tác của bạn đã được chấp thuận!"
+                               required />
+                    </div>
+
+                    <!-- 2) Preview + hidden body -->
+                    <div class="mb-3">
+                        <label class="form-label">Xem trước thư</label>
+                        <div id="approvePreview-@p.Id"
+                             class="border rounded p-3"
+                             style="background:#fff; max-height:300px; overflow:auto;">
+                            <!-- --- cố định trước --- -->
+                            <div style="font-family:Arial,sans-serif;color:#333">
+                                <h2 style="color:#E53935;">Xin chào @p.User.FullName,</h2>
+                                <p>
+                                    Xin chúc mừng! Yêu cầu trở thành
+                                    <strong>Đối tác giảng dạy</strong> của bạn
+                                    đã được <span style="color:#22c55e">chấp thuận</span>.
+                                </p>
+                            </div>
+                            <!-- chỗ chèn thêm -->
+                            <div id="approveExtra-@p.Id"></div>
+                            <!-- --- cố định sau --- -->
+                            <div style="font-family:Arial,sans-serif;color:#333; margin-top:1rem;">
+                                <p class="text-center">
+                                    <a href="{{CallbackUrl}}"
+                                       id="approveLink-@p.Id"
+                                       style="display:inline-block;padding:10px 20px;
+                                                  background:#E53935;color:#fff;text-decoration:none;
+                                                  border-radius:4px;font-weight:bold;">
+                                        Xác nhận và đăng nhập
+                                    </a>
+                                </p>
+                                <p style="font-size:.85rem;color:#666;">
+                                    Nếu nút trên không hoạt động, sao chép & dán liên kết sau:<br />
+                                    <a href="{{CallbackUrl}}"
+                                       id="approveUrl-@p.Id"
+                                       style="color:#1a73e8;word-break:break-all;">
+                                        {{CallbackUrl}}
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                        <input type="hidden" name="body" id="hiddenApproveBody-@p.Id" />
+                    </div>
+
+                    <!-- 3) Editor admin chèn thêm -->
+                    <div class="mb-3">
+                        <label class="form-label">Nội dung bổ sung</label>
+                        <textarea id="approveEditor-@p.Id"
+                              class="form-control"
+                              rows="4"
+                              placeholder="Nhắc nhẹ partner về điều gì đó…"></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success">Gửi thư & Phê duyệt</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Từ chối -->
+    <div class="modal fade" id="rejectModal-@p.Id" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <form asp-action="RejectPartner" asp-controller="Admin" method="post" class="modal-content">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="partnerId" value="@p.Id" />
+
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">
+                        <i class="bi bi-x-circle-fill"></i> Soạn thư từ chối
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- 1) Chủ đề -->
+                    <div class="mb-3">
+                        <label class="form-label">Chủ đề thư</label>
+                        <input type="text" name="subject" class="form-control"
+                               value="🙏 Cập nhật trạng thái Đối tác" required />
+                    </div>
+
+                    <!-- 2) Preview + hidden body -->
+                    <div class="mb-3">
+                        <label class="form-label">Xem trước thư</label>
+                        <div id="rejectPreview-@p.Id"
+                             class="border rounded p-3"
+                             style="background:#fff; max-height:300px; overflow:auto;">
+                            <!-- --- cố định trước --- -->
+                            <div style="font-family:Arial,sans-serif;color:#333">
+                                <h2 style="color:#D32F2F;">Rất tiếc, @p.User.FullName</h2>
+                                <p>
+                                    Rất tiếc, yêu cầu trở thành
+                                    <strong>Đối tác giảng dạy</strong> của bạn
+                                    <span style="color:#D32F2F">chưa được chấp thuận</span>.
+                                </p>
+                            </div>
+                            <!-- chỗ chèn thêm -->
+                            <div id="rejectExtra-@p.Id"></div>
+                            <!-- --- cố định sau --- -->
+                            <div style="font-family:Arial,sans-serif;color:#333; margin-top:1rem;">
+                                <p>
+                                    Bạn có thể tích lũy thêm kinh nghiệm và
+                                    <a href="{{RegisterUrl}}" id="rejectRegisterLink-@p.Id" style="color:#1a73e8;">
+                                        nộp đơn lại
+                                    </a> khi sẵn sàng.
+                                </p>
+                            </div>
+                        </div>
+                        <input type="hidden" name="body" id="hiddenRejectBody-@p.Id" />
+                    </div>
+
+                    <!-- 3) Editor admin chèn thêm -->
+                    <div class="mb-3">
+                        <label class="form-label">Lý do / lưu ý thêm</label>
+                        <textarea id="rejectEditor-@p.Id"
+                              class="form-control"
+                              rows="4"
+                              placeholder="Giải thích thêm lý do hoặc hướng dẫn…"></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger">Gửi thư & Từ chối</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Tooltip init
+            document.querySelectorAll('[data-bs-toggle="tooltip"]')
+                    .forEach(el => new bootstrap.Tooltip(el));
+
+            // Wire up dropdown selection
+            const wireUp = (selector, inputId) => {
+                document.querySelectorAll(selector).forEach(el =>
+                    el.addEventListener('click', e => {
+                        e.preventDefault();
+                        document.getElementById(inputId).value = el.dataset.val;
+                        document.querySelectorAll(selector).forEach(x => x.classList.remove('active'));
+                        el.classList.add('active');
+                        el.closest('.hover-dropdown').querySelector('button').textContent = el.textContent.trim();
+                    })
+                );
+            };
+            wireUp('.exp-item', 'expInput');
+            wireUp('.spec-item', 'specInput');
+            wireUp('.date-item', 'dateInput');
+
+            // Copy preview HTML into hidden body before submit
+            @foreach (var p in items)
+            {
+                    <text>
+                    (function() {
+                        var form = document.querySelector('#approveModal-@p.Id form');
+                        var preview = document.getElementById('approvePreview-@p.Id');
+                        var hidden = document.getElementById('hiddenApproveBody-@p.Id');
+                        form.addEventListener('submit', function() {
+                            hidden.value = preview.innerHTML;
+                        });
+
+                        var rejectForm = document.querySelector('#rejectModal-@p.Id form');
+                        var rejectPreview = document.getElementById('rejectPreview-@p.Id');
+                        var rejectHidden = document.getElementById('hiddenRejectBody-@p.Id');
+                        rejectForm.addEventListener('submit', function() {
+                            rejectHidden.value = rejectPreview.innerHTML;
+                        });
+                    })();
+                    </text>
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          @foreach (var p in items)
+        {
+                <text>
+                // —— Live preview cho Modal Phê duyệt ——
+                (function(){
+                  var editor   = document.getElementById('approveEditor-@p.Id');
+                  var extraDiv = document.getElementById('approveExtra-@p.Id');
+                  editor.addEventListener('input', function() {
+                    extraDiv.innerHTML = this.value
+                      .split('\n').map(line => `<p>${line}</p>`).join('');
+                  });
+                })();
+
+                // —— Live preview cho Modal Từ chối ——
+                (function(){
+                  var rejectEditor = document.getElementById('rejectEditor-@p.Id');
+                  var rejectExtra  = document.getElementById('rejectExtra-@p.Id');
+                  rejectEditor.addEventListener('input', function() {
+                    rejectExtra.innerHTML = this.value
+                      .split('\n').map(line => `<p>${line}</p>`).join('');
+                  });
+                })();
+                </text>
+          }
+        });
+    </script>
+
+}
+
+ 

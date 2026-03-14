@@ -1,0 +1,159 @@
+﻿@using JapaneseLearningPlatform.Helpers
+@model JapaneseLearningPlatform.Models.ApplicationUser
+
+@{
+    ViewData["Title"] = "Hồ sơ của tôi";
+    ViewData["HideFooter"] = false;
+    Layout = "_Layout";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap" rel="stylesheet" />
+}
+
+<div class="my-profile-container">
+    <div class="row gx-5 justify-content-center">
+        <!-- CỘT TRÁI: Chào mừng & Ảnh đại diện -->
+        <div class="col-md-4 text-center">
+            <div class="welcome-box text-center mb-4">
+                <h2 class="fw-bold text-danger">Chào mừng, @Model.FullName!</h2>
+            </div>
+
+            <div class="avatar-box mb-4">
+                <img src="@(string.IsNullOrEmpty(Model.ProfilePicturePath)
+                                                                      ? "/uploads/profile/default-img.jpg"
+                                                                      : Model.ProfilePicturePath)"
+                     alt="Avatar"
+                     class="rounded-circle img-thumbnail profile-image mb-3" />
+
+                <form asp-action="UploadProfilePicture"
+                      asp-controller="Partner"
+                      method="post"
+                      enctype="multipart/form-data">
+                    <div class="form-group">
+                        <input type="file" name="profilePicture"
+                               class="form-control mb-2"
+                               id="profilePictureInput"
+                               accept="image/*"
+                               onchange="previewProfileImage()" />
+
+                        <img id="profilePreview" src="#"
+                             alt="Xem trước"
+                             class="rounded-circle img-thumbnail mb-3 d-none"
+                             style="width:150px; height:150px; object-fit:cover;" />
+
+                        @if (TempData["UploadError"] != null)
+                        {
+                            <small class="text-danger d-block mb-2">
+                                @TempData["UploadError"]
+                            </small>
+                        }
+
+                        <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+                            Tải ảnh mới
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI: Thông tin, Hành động nhanh, Thông tin đối tác -->
+        <div class="col-md-6">
+            <div class="info-wrapper p-4 rounded shadow-sm">
+                <!-- Thông tin cơ bản -->
+                <div class="user-info mb-4">
+                    <h4 class="fw-bold mb-3 text-center text-danger">Thông tin của bạn</h4>
+                    <p><strong>Họ và tên:</strong> @Model.FullName</p>
+                    <p><strong>Email:</strong> @Model.Email</p>
+                    <p><strong>Vai trò:</strong> @Model.Role</p>
+
+                    @* Thông tin chỉ dành cho Partner *@
+                    @if (Model.PartnerProfile != null)
+                    {
+                        <p>
+                            <strong>Kinh nghiệm:</strong> @Model.PartnerProfile.YearsOfExperience.GetDisplayName()
+                        </p>
+                        <p>
+                            <strong>Chuyên môn:</strong>
+                            @if (Model.PartnerProfile.Specializations.Any())
+                            {
+                                @string.Join(", ",
+                                Model.PartnerProfile.Specializations
+                                .Select(s => s.Specialization.GetDisplayName()))
+                                                }
+                            else
+                            {
+                                <em>Chưa chọn chuyên môn</em>
+                            }
+                        </p>
+                    }
+                </div>
+
+                @* Tài liệu đối tác (chỉ xem) *@
+                @if (Model.PartnerProfile?.Documents?.Any() == true)
+                {
+                    <div class="partner-documents mb-4">
+                        <h5 class="text-danger mb-3 fw-bold">Tài liệu của bạn</h5>
+                        <ul class="list-unstyled d-flex flex-wrap gap-3">
+                            @foreach (var doc in Model.PartnerProfile.Documents)
+                            {
+                                <li>
+                                    <a href="@doc.FilePath" target="_blank">
+                                        <img src="@doc.FilePath"
+                                             class="img-thumbnail"
+                                             style="width:120px; height:120px; object-fit:cover;" />
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <!-- Thao tác nhanh -->
+                <div class="quick-actions mb-4">
+                    <h5 class="text-danger mb-3 fw-bold">Thao tác nhanh</h5>
+                    <div class="action-buttons d-grid gap-2">
+                        <a class="action-link btn btn-outline-danger"
+                           asp-controller="ClassroomTemplates" asp-action="MyTemplate">
+                            <i class="bi bi-book"></i> Mẫu lớp học của tôi
+                        </a>
+                        <a class="action-link btn btn-outline-danger"
+                           asp-controller="ClassroomInstances" asp-action="MySession">
+                            <i class="bi bi-easel"></i> Phiên lớp học của tôi
+                        </a>
+                        <a class="action-link btn btn-outline-danger"
+                           asp-controller="Partner" asp-action="EditProfile">
+                            <i class="bi bi-pencil-square"></i> Chỉnh sửa hồ sơ
+                        </a>
+                        <a class="action-link btn btn-outline-danger"
+                           asp-controller="Learner" asp-action="ChangePassword">
+                            <i class="bi bi-lock"></i> Đổi mật khẩu
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function previewProfileImage() {
+            const input = document.getElementById('profilePictureInput');
+            const preview = document.getElementById('profilePreview');
+            if (input.files?.[0]) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    preview.src = e.target.result;
+                    preview.classList.remove('d-none');
+                };
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                preview.src = "#";
+                preview.classList.add('d-none');
+            }
+        }
+        });
+    </script>
+}
