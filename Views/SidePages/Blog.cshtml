@@ -1,0 +1,222 @@
+﻿@{
+    ViewData["Title"] = "Blog - ";
+}
+
+@section Head {
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+          content="Khám phá mẹo học tiếng Nhật, hiểu sâu văn hóa, câu chuyện thành công của học viên và lời khuyên chuyên môn từ giảng viên và cộng đồng của chúng tôi." />
+}
+
+@section Styles {
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="~/css/blog.css" />
+    <link rel="stylesheet" href="~/css/styles.css" />
+    <link rel="stylesheet" href="~/css/footer.css" />
+}
+
+<main>
+    <!-- BEGIN: Development Banner -->
+    <section class="dev-banner d-flex align-items-center">
+        <div class="container d-flex align-items-center">
+            <img src="https://img.icons8.com/ios-filled/80/000000/robot.png"
+                 alt="Robot đang xây dựng"
+                 class="me-3 dev-banner-icon" />
+            <div>
+                <h4 class="dev-banner-title mb-1">🔧 Tính năng đang phát triển</h4>
+                <p class="dev-banner-text mb-0">
+                    Trang này hiện vẫn đang trong giai đoạn phát triển và nội dung chỉ mang tính <em>placeholder</em>.
+                    Cảm ơn bạn đã kiên nhẫn, chúng tôi sẽ cập nhật sớm!
+                </p>
+            </div>
+        </div>
+    </section>
+    <!-- Phần Blog Hero -->
+    <section class="blog-hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    Cùng nhau <span class="text-gradient">Học Tiếng Nhật</span>
+                </h1>
+                <p class="hero-description">
+                    Khám phá góc nhìn, mẹo và câu chuyện từ cộng đồng học tiếng Nhật của chúng tôi.
+                    Từ hướng dẫn ngữ pháp đến đi sâu vào văn hóa, hãy trải nghiệm mọi điều làm nên
+                    hành trình học tiếng Nhật tuyệt vời.
+                </p>
+                <div class="hero-search">
+                    <div class="search-box">
+                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.35-4.35" />
+                        </svg>
+                        <input type="text" id="blogSearch" placeholder="Tìm kiếm bài viết..." class="search-input" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bài viết nổi bật -->
+    <section class="featured-article-section">
+        <div class="container">
+            <div class="featured-article">
+                <div class="featured-image">
+                    <img src="https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=800&h=500&fit=crop"
+                         alt="Bài viết nổi bật" />
+                    <div class="featured-badge">Nổi bật</div>
+                </div>
+                <div class="featured-content">
+                    <div class="article-meta">
+                        <span class="article-category">Hiểu về Văn hóa</span>
+                        <span class="article-date">18 Tháng 3, 2024</span>
+                        <span class="article-reading-time">8 phút đọc</span>
+                    </div>
+                    <h2 class="featured-title">Hiểu về Keigo: Nghệ thuật Lịch sự trong tiếng Nhật</h2>
+                    <p class="featured-excerpt">
+                        Khám phá sâu về ngôn ngữ kính ngữ Nhật Bản (keigo) và tìm hiểu cách làm chủ những
+                        biểu hiện này có thể thay đổi cách giao tiếp của bạn. Từ thể hiện sự tôn trọng cơ bản
+                        đến trang trọng trong kinh doanh, học khi nào và làm thế nào để sử dụng chúng.
+                    </p>
+                    <div class="article-author">
+                        <div class="author-avatar">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=YukiSensei&backgroundColor=b6e3f4"
+                                 alt="Yuki Tanaka" />
+                        </div>
+                        <div class="author-info">
+                            <div class="author-name">Yuki Tanaka</div>
+                            <div class="author-title">Giảng viên Cao cấp tiếng Nhật</div>
+                        </div>
+                    </div>
+                    <a href="#" class="btn btn-primary">Đọc bài đầy đủ</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Phân loại -->
+    <section class="categories-section">
+        <div class="container">
+            <h2 class="section-title">Khám phá theo Danh mục</h2>
+            <div class="categories-grid">
+                @* Lặp qua model hoặc đặt cứng các thẻ category-card *@
+                <div class="category-card" data-category="learning-tips">
+                    <div class="category-icon">📚</div>
+                    <h3 class="category-title">Mẹo Học</h3>
+                    <p class="category-description">
+                        Phương pháp học hiệu quả, kỹ thuật ghi nhớ và chiến lược học tập
+                    </p>
+                    <div class="category-count">45 bài viết</div>
+                </div>
+                
+                <div class="category-card" data-category="grammar">
+                    <div class="category-icon">📝</div>
+                    <h3 class="category-title">Hướng dẫn ngữ pháp</h3>
+                    <p class="category-description">
+                        Giải thích chi tiết các cấu trúc ngữ pháp tiếng Nhật và cách sử dụng
+                    </p>
+                    <div class="category-count">62 bài viết</div>
+                </div>
+
+                <div class="category-card" data-category="culture">
+                    <div class="category-icon">🎌</div>
+                    <h3 class="category-title">Hiểu biết văn hóa</h3>
+                    <p class="category-description">
+                        Truyền thống, phong tục và hiện tượng văn hóa hiện đại của Nhật Bản
+                    </p>
+                    <div class="category-count">38 bài viết</div>
+                </div>
+
+                <div class="category-card" data-category="success-stories">
+                    <div class="category-icon">🌟</div>
+                    <h3 class="category-title">Câu chuyện thành công</h3>
+                    <p class="category-description">
+                        Hành trình truyền cảm hứng và thành tựu từ học viên của chúng tôi
+                    </p>
+                    <div class="category-count">24 bài viết</div>
+                </div>
+
+                <div class="category-card" data-category="teacher-interviews">
+                    <div class="category-icon">👨‍🏫</div>
+                    <h3 class="category-title">Phỏng vấn giảng viên</h3>
+                    <p class="category-description">
+                        Những hiểu biết và lời khuyên từ các giảng viên tiếng Nhật chuyên gia của chúng tôi
+                    </p>
+                    <div class="category-count">16 bài viết</div>
+                </div>
+
+                <div class="category-card" data-category="jlpt">
+                    <div class="category-icon">🎯</div>
+                    <h3 class="category-title">Ôn thi JLPT</h3>
+                    <p class="category-description">
+                        Chiến lược làm bài, bài tập thực hành và kế hoạch ôn thi
+                    </p>
+                    <div class="category-count">31 bài viết</div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Bài viết gần đây -->
+    <section class="articles-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Bài viết Mới nhất</h2>
+                <div class="section-filters">
+                    <select id="categoryFilter" class="filter-select">
+                        <option value="">Tất cả Danh mục</option>
+                        <option value="learning-tips">Mẹo Học</option>
+                        <!-- ... -->
+                    </select>
+                    <select id="sortFilter" class="filter-select">
+                        <option value="newest">Mới nhất trước</option>
+                        <option value="oldest">Cũ nhất trước</option>
+                        <option value="popular">Phổ biến nhất</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="articles-grid" id="articlesGrid">
+                @* Nội dung bài viết sẽ render bằng JS hoặc từ Model *@
+            </div>
+
+            <div class="load-more-section">
+                <button class="btn btn-outline" id="loadMoreBtn">Tải thêm bài viết</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Đăng ký nhận bản tin -->
+    <section class="newsletter-section">
+        <div class="container">
+            <div class="newsletter-content">
+                <div class="newsletter-text">
+                    <h2 class="newsletter-title">Cập nhật Liên tục</h2>
+                    <p class="newsletter-description">
+                        Nhận mẹo học tiếng Nhật mới nhất, hiểu sâu văn hóa và câu chuyện thành công
+                        được gửi đến hộp thư của bạn. Tham gia cùng 25.000+ học viên đã đăng ký bản tin hàng tuần.
+                    </p>
+                </div>
+                <form class="newsletter-form" id="newsletterForm">
+                    <div class="form-group">
+                        <input type="email" id="newsletterEmail"
+                               placeholder="Nhập email của bạn"
+                               class="newsletter-input" required />
+                        <button type="submit" class="btn btn-primary">Đăng ký</button>
+                    </div>
+                    <p class="newsletter-note">
+                        Miễn phí đăng ký. Hủy bất cứ lúc nào. Cam kết không spam! 📧
+                    </p>
+                </form>
+            </div>
+        </div>
+    </section>
+</main>
+
+@section Scripts {
+    <script src="~/js/blog.js"></script>
+    <script src="~/js/script.js"></script>
+}

@@ -1,0 +1,512 @@
+﻿@{
+    Layout = "_Layout";
+    ViewBag.Title = "Cộng Đồng";
+}
+
+@section Head {
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title</title>
+    <meta name="description"
+          content="Tham gia cộng đồng Nihongo Sekai. Kết nối với những người học khác, tham gia sự kiện, chia sẻ kinh nghiệm và cùng thực hành tiếng Nhật." />
+}
+
+@section Styles {
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="~/css/community.css" />
+    <link rel="stylesheet" href="~/css/styles.css" />
+    <link rel="stylesheet" href="~/css/footer.css" />
+
+    <!-- Favicon -->
+    <link rel="icon"
+          href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎌</text></svg>" />
+}
+
+<body>
+
+    <!-- Phần đầu trang -->
+    <main>
+        <!-- BEGIN: Development Banner -->
+        <section class="dev-banner d-flex align-items-center">
+            <div class="container d-flex align-items-center">
+                <img src="https://img.icons8.com/ios-filled/80/000000/robot.png"
+                     alt="Robot đang xây dựng"
+                     class="me-3 dev-banner-icon" />
+                <div>
+                    <h4 class="dev-banner-title mb-1">🔧 Tính năng đang phát triển</h4>
+                    <p class="dev-banner-text mb-0">
+                        Trang này hiện vẫn đang trong giai đoạn phát triển và nội dung chỉ mang tính <em>placeholder</em>.
+                        Cảm ơn bạn đã kiên nhẫn, chúng tôi sẽ cập nhật sớm!
+                    </p>
+                </div>
+            </div>
+        </section>
+        <!-- Phần Đầu Trang -->
+        <section class="community-hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        Tham gia <span class="text-gradient">Cộng đồng Toàn cầu</span> của chúng tôi
+                    </h1>
+                    <p class="hero-description">
+                        Kết nối với hơn 50.000 người học tiếng Nhật trên toàn thế giới. Chia sẻ kinh nghiệm, cùng nhau thực hành và ăn mừng hành trình học tập của bạn với các bạn học và giáo viên bản ngữ.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary" onclick="showJoinModal()">
+                            Tham gia Cộng đồng
+                        </button>
+                        <button class="btn btn-outline" onclick="scrollToForums()">
+                            Xem Diễn đàn
+                        </button>
+                    </div>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-card">
+                        <div class="stat-number">50,000+</div>
+                        <div class="stat-label">Thành viên hoạt động</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">2,500+</div>
+                        <div class="stat-label">Bài viết mỗi ngày</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">120+</div>
+                        <div class="stat-label">Quốc gia</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tính năng Cộng đồng -->
+        <section class="features-section">
+            <div class="container">
+                <h2 class="section-title">Tính năng Cộng đồng</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <!-- SVG icon -->
+                        </div>
+                        <h3 class="feature-title">Diễn đàn Thảo luận</h3>
+                        <p class="feature-description">
+                            Tham gia các chủ đề thảo luận, đặt câu hỏi và chia sẻ mẹo học tập với cộng đồng học viên và giáo viên.
+                        </p>
+                        <a href="#forums" class="feature-link">Khám phá Diễn đàn →</a>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <!-- SVG icon -->
+                        </div>
+                        <h3 class="feature-title">Sự kiện Cộng đồng</h3>
+                        <p class="feature-description">
+                            Tham gia các sự kiện văn hóa trực tuyến, buổi gặp gỡ thực hành nói và thử thách học tập đặc biệt quanh năm.
+                        </p>
+                        <a href="#events" class="feature-link">Xem Sự kiện →</a>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <!-- SVG icon -->
+                        </div>
+                        <h3 class="feature-title">Nhóm Học tập</h3>
+                        <p class="feature-description">
+                            Tạo hoặc tham gia nhóm học với những người có cùng trình độ. Học cùng nhau và khích lệ nhau trên hành trình chinh phục tiếng Nhật.
+                        </p>
+                        <a href="#study-groups" class="feature-link">Tìm Nhóm →</a>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <!-- SVG icon -->
+                        </div>
+                        <h3 class="feature-title">Hệ thống Thành tích</h3>
+                        <p class="feature-description">
+                            Kiếm huy hiệu và sự công nhận cho những đóng góp, cột mốc học tập và sự tham gia của bạn trong cộng đồng.
+                        </p>
+                        <a href="#achievements" class="feature-link">Xem Huy hiệu →</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Diễn đàn Thảo luận -->
+        <section class="forums-section" id="forums">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Diễn đàn Thảo luận</h2>
+                    <p class="section-subtitle">
+                        Kết nối với các bạn học và giáo viên trong các diễn đàn thảo luận sôi động
+                    </p>
+                </div>
+
+                <div class="forums-grid">
+                    <div class="forum-category">
+                        <div class="forum-header">
+                            <div class="forum-icon">📚</div>
+                            <div class="forum-info">
+                                <h3 class="forum-title">Chung về Học tập</h3>
+                                <p class="forum-description">
+                                    Thảo luận chung về việc học tiếng Nhật, mẹo học và động lực
+                                </p>
+                            </div>
+                            <div class="forum-stats">
+                                <div class="stat">1.234 chủ đề</div>
+                                <div class="stat">15.678 bài viết</div>
+                            </div>
+                        </div>
+                        <div class="recent-topics">
+                            <div class="topic-item">
+                                <div class="topic-title">
+                                    Best apps to complement Nihongo Sekai?
+                                </div>
+                                <div class="topic-meta">bởi KenjiLearner • 2 giờ trước</div>
+                            </div>
+                            <div class="topic-item">
+                                <div class="topic-title">
+                                    How to stay motivated during N3 preparation
+                                </div>
+                                <div class="topic-meta">bởi SakuraStudent • 5 giờ trước</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="forum-category">
+                        <div class="forum-header">
+                            <div class="forum-icon">📝</div>
+                            <div class="forum-info">
+                                <h3 class="forum-title">Ngữ pháp & Từ vựng</h3>
+                                <p class="forum-description">
+                                    Các câu hỏi về ngữ pháp, từ vựng và cách sử dụng tiếng Nhật
+                                </p>
+                            </div>
+                            <div class="forum-stats">
+                                <div class="stat">2.567 chủ đề</div>
+                                <div class="stat">28.903 bài viết</div>
+                            </div>
+                        </div>
+                        <div class="recent-topics">
+                            <div class="topic-item">
+                                <div class="topic-title">
+                                    Difference between は and が particles
+                                </div>
+                                <div class="topic-meta">bởi GrammarSeeker • 1 giờ trước</div>
+                            </div>
+                            <div class="topic-item">
+                                <div class="topic-title">Keigo in everyday conversation</div>
+                                <div class="topic-meta">bởi PoliteStudent • 3 giờ trước</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="forum-category">
+                        <div class="forum-header">
+                            <div class="forum-icon">🎌</div>
+                            <div class="forum-info">
+                                <h3 class="forum-title">Văn hóa Nhật Bản</h3>
+                                <p class="forum-description">
+                                    Thảo luận về văn hóa, truyền thống, và xã hội Nhật Bản
+                                </p>
+                            </div>
+                            <div class="forum-stats">
+                                <div class="stat">890 chủ đề</div>
+                                <div class="stat">12.456 bài viết</div>
+                            </div>
+                        </div>
+                        <div class="recent-topics">
+                            <div class="topic-item">
+                                <div class="topic-title">
+                                    Cherry blossom viewing traditions (Hanami)
+                                </div>
+                                <div class="topic-meta">bởi CultureLover • 4 giờ trước</div>
+                            </div>
+                            <div class="topic-item">
+                                <div class="topic-title">
+                                    Business etiquette in Japanese companies
+                                </div>
+                                <div class="topic-meta">bởi TokyoWorker • 6 giờ trước</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="forum-category">
+                        <div class="forum-header">
+                            <div class="forum-icon">🗣️</div>
+                            <div class="forum-info">
+                                <h3 class="forum-title">Luyện Nói</h3>
+                                <p class="forum-description">
+                                    Tìm bạn luyện nói, mẹo phát âm và thử thách luyện nói
+                                </p>
+                            </div>
+                            <div class="forum-stats">
+                                <div class="stat">456 chủ đề</div>
+                                <div class="stat">7.892 bài viết</div>
+                            </div>
+                        </div>
+                        <div class="recent-topics">
+                            <div class="topic-item">
+                                <div class="topic-title">
+                                    Weekly pronunciation challenge: Week 12
+                                </div>
+                                <div class="topic-meta">
+                                    bởi SpeakingCoach • 30 phút trước
+                                </div>
+                            </div>
+                            <div class="topic-item">
+                                <div class="topic-title">
+                                    Looking for conversation partner (PST timezone)
+                                </div>
+                                <div class="topic-meta">
+                                    bởi CaliforniaTalker • 2 giờ trước
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sự kiện sắp tới -->
+        <section class="events-section" id="events">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Sự kiện Cộng đồng Sắp diễn ra</h2>
+                    <p class="section-subtitle">
+                        Tham gia các sự kiện định kỳ để thực hành, học tập và kết nối với cộng đồng
+                    </p>
+                </div>
+
+                <div class="events-grid">
+                    <div class="event-card featured">
+                        <div class="event-badge">Nổi bật</div>
+                        <div class="event-date">
+                            <div class="event-month">Th3</div>
+                            <div class="event-day">25</div>
+                        </div>
+                        <div class="event-content">
+                            <h3 class="event-title">Lễ hội Xuân trực tuyến</h3>
+                            <p class="event-description">
+                                Tham gia buổi hanami (ngắm hoa anh đào) ảo với trò chơi, thuyết trình văn hóa và luyện tập giao tiếp.
+                            </p>
+                            <div class="event-details">
+                                <div class="event-time">🕒 14:00 JST</div>
+                                <div class="event-participants">👥 245 người đăng ký</div>
+                            </div>
+                            <button class="btn btn-primary">Đăng ký ngay</button>
+                        </div>
+                    </div>
+
+                    <div class="event-card">
+                        <div class="event-date">
+                            <div class="event-month">Th3</div>
+                            <div class="event-day">28</div>
+                        </div>
+                        <div class="event-content">
+                            <h3 class="event-title">Vòng Tròn Hội thoại hàng tuần</h3>
+                            <p class="event-description">
+                                Luyện nói tiếng Nhật với học viên và giáo viên bản ngữ trong nhóm nhỏ.
+                            </p>
+                            <div class="event-details">
+                                <div class="event-time">🕒 19:00 JST</div>
+                                <div class="event-participants">👥 67 người đăng ký</div>
+                            </div>
+                            <button class="btn btn-outline">Tham gia sự kiện</button>
+                        </div>
+                    </div>
+
+                    <div class="event-card">
+                        <div class="event-date">
+                            <div class="event-month">Th4</div>
+                            <div class="event-day">02</div>
+                        </div>
+                        <div class="event-content">
+                            <h3 class="event-title">Marathon Học JLPT</h3>
+                            <p class="event-description">
+                                Buổi học tập chuyên sâu dành cho học viên N3–N1 chuẩn bị cho kỳ thi JLPT tháng 7.
+                            </p>
+                            <div class="event-details">
+                                <div class="event-time">🕒 10:00 JST</div>
+                                <div class="event-participants">👥 189 người đăng ký</div>
+                            </div>
+                            <button class="btn btn-outline">Đăng ký</button>
+                        </div>
+                    </div>
+
+                    <div class="event-card">
+                        <div class="event-date">
+                            <div class="event-month">Th4</div>
+                            <div class="event-day">05</div>
+                        </div>
+                        <div class="event-content">
+                            <h3 class="event-title">Lớp Nấu ăn Văn hóa</h3>
+                            <p class="event-description">
+                                Học làm các món ăn truyền thống Nhật Bản đồng thời luyện từ vựng liên quan đến bếp núc.
+                            </p>
+                            <div class="event-details">
+                                <div class="event-time">🕒 15:00 JST</div>
+                                <div class="event-participants">👥 34 người đăng ký</div>
+                            </div>
+                            <button class="btn btn-outline">Tham gia lớp học</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Câu chuyện thành công -->
+        <section class="stories-section">
+            <div class="container">
+                <h2 class="section-title">Câu chuyện Thành công từ Cộng đồng</h2>
+                <div class="stories-grid">
+                    <div class="story-card">
+                        <div class="story-avatar">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Maria&backgroundColor=b6e3f4"
+                                 alt="Maria Silva" />
+                        </div>
+                        <div class="story-content">
+                            <div class="story-quote">
+                                "Cộng đồng ở đây thật tuyệt vời! Tôi đã tìm được bạn học qua diễn đàn và chúng tôi đã cùng nhau luyện tập suốt 6 tháng. Tôi đã vượt qua N4 vào tháng 12 vừa rồi!"
+                            </div>
+                            <div class="story-author">
+                                <div class="author-name">Maria Silva</div>
+                                <div class="author-location">São Paulo, Brazil</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="story-card">
+                        <div class="story-avatar">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmed&backgroundColor=ffd93d"
+                                 alt="Ahmed Hassan" />
+                        </div>
+                        <div class="story-content">
+                            <div class="story-quote">
+                                "Các sự kiện trao đổi văn hóa đã mở mang cho tôi rất nhiều khía cạnh xã hội Nhật Bản mà trước đây tôi chưa biết. Giờ tôi rất tự tin chuẩn bị cho chuyến đi đến Tokyo!"
+                            </div>
+                            <div class="story-author">
+                                <div class="author-name">Ahmed Hassan</div>
+                                <div class="author-location">Cairo, Egypt</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="story-card">
+                        <div class="story-avatar">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Emma&backgroundColor=ffdfbf"
+                                 alt="Emma Johnson" />
+                        </div>
+                        <div class="story-content">
+                            <div class="story-quote">
+                                "Việc trở thành một phần của cộng đồng này đã thúc đẩy tôi tiếp tục học ngay cả khi gặp khó khăn. Sự hỗ trợ và khích lệ từ mọi người thật phi thường!"
+                            </div>
+                            <div class="story-author">
+                                <div class="author-name">Emma Johnson</div>
+                                <div class="author-location">London, UK</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quy tắc Cộng đồng -->
+        <section class="guidelines-section">
+            <div class="container">
+                <div class="guidelines-content">
+                    <div class="guidelines-text">
+                        <h2 class="section-title">Quy tắc Cộng đồng</h2>
+                        <p class="guidelines-intro">
+                            Cộng đồng của chúng ta phát triển dựa trên tôn trọng lẫn nhau, lòng tốt và niềm đam mê chung với tiếng Nhật. Vui lòng tuân thủ các quy tắc sau để giúp môi trường luôn tích cực cho mọi người.
+                        </p>
+
+                        <div class="guidelines-list">
+                            <div class="guideline-item">
+                                <div class="guideline-icon">🤝</div>
+                                <div class="guideline-content">
+                                    <h4>Lịch sự và Tôn trọng</h4>
+                                    <p>
+                                        Đối xử với mọi thành viên bằng sự tử tế và tôn trọng, bất kể trình độ hay xuất thân.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="guideline-item">
+                                <div class="guideline-icon">💬</div>
+                                <div class="guideline-content">
+                                    <h4>Giữ chủ đề phù hợp</h4>
+                                    <p>
+                                        Giữ các thảo luận liên quan đến việc học tiếng Nhật, văn hóa hoặc chủ đề cộng đồng.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="guideline-item">
+                                <div class="guideline-icon">🎯</div>
+                                <div class="guideline-content">
+                                    <h4>Giúp đỡ người khác học</h4>
+                                    <p>
+                                        Chia sẻ kiến thức, trả lời câu hỏi và hỗ trợ bạn học trên hành trình của họ.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="guideline-item">
+                                <div class="guideline-icon">🎉</div>
+                                <div class="guideline-content">
+                                    <h4>Chúc mừng tiến bộ</h4>
+                                    <p>
+                                        Công nhận thành tích, cột mốc và tiến trình của các thành viên trong cộng đồng.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="guidelines-image">
+                        <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500&h=600&fit=crop"
+                             alt="Quy tắc Cộng đồng" />
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    @* Scripts *@
+    <script src="~/js/script.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", initializeCommunityPage);
+
+        function initializeCommunityPage() {
+            setupEventRegistration();
+            setupForumNavigation();
+        }
+
+        function showJoinModal() {
+            NihongoSekai.showToast(
+                "Join our community by creating a free account! Sign up to get started.",
+                "info"
+            );
+        }
+
+        function scrollToForums() {
+            document.getElementById("forums").scrollIntoView({ behavior: "smooth" });
+        }
+
+        function setupEventRegistration() {
+            document.querySelectorAll(".event-card .btn").forEach(btn => {
+                btn.addEventListener("click", e => {
+                    const title = e.target.closest(".event-card")
+                                     .querySelector(".event-title").textContent;
+                    NihongoSekai.showToast(`Registered: ${title}`, "success");
+                });
+            });
+        }
+
+        function setupForumNavigation() {
+            document.querySelectorAll(".forum-category").forEach(cat => {
+                cat.addEventListener("click", () => {
+                    const name = cat.querySelector(".forum-title").textContent;
+                    NihongoSekai.showToast(`Opening ${name} forum…`, "info");
+                });
+            });
+        }
+    </script>
+</body>
+

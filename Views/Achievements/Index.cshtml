@@ -1,0 +1,69 @@
+﻿@model IEnumerable<AchievementItemVM>
+@{
+    ViewData["Title"] = "Thành tích của tôi";
+}
+
+<div class="container py-5">
+    <h3 class="mb-4">@ViewData["Title"]</h3>
+
+    @if (ViewBag.Message != null)
+    {
+        <div class="alert alert-info">
+            @ViewBag.Message
+        </div>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach (var a in Model)
+            {
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <img src="@a.ThumbnailUrl"
+                             style="width:60px;height:60px"
+                             class="me-3 rounded" />
+                        <div>
+                            <strong>@a.CourseName</strong><br />
+                            <small>@a.CompletedAt.ToString("dd MMM yyyy HH:mm")</small>
+                        </div>
+                    </div>
+                    <div>
+                        <!-- Nút Xem khóa -->
+                        <a asp-controller="Courses"
+                           asp-action="Details"
+                           asp-route-id="@a.CourseId"
+                           class="btn btn-sm btn-secondary me-2">
+                            <i class="bi bi-box-arrow-in-right"></i> Xem khóa
+                        </a>
+
+                        <!-- Nút Xem chứng chỉ -->
+                        <button type="button"
+                                class="btn btn-sm btn-primary btn-cert"
+                                data-course-id="@a.CourseId">
+                            <i class="bi bi-file-earmark-person"></i> Xem chứng chỉ
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          document.querySelectorAll('.btn-cert').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+              e.preventDefault();
+              Swal.fire({
+                title: '🚧 Tính năng sắp tới',
+                text:  'Chứng chỉ cho khoá này đang được cập nhật. Vui lòng quay lại sau nhé!',
+                icon:  'info',
+                confirmButtonText: 'OK'
+              });
+            });
+          });
+        });
+    </script>
+}

@@ -1,0 +1,321 @@
+﻿@using JapaneseLearningPlatform.Data.ViewModels
+@model LoginVM
+
+@{
+    ViewData["Title"] = "Đối tác Nhật Bản";
+    Layout = "_Layout";
+    ViewData["HideNavbar"] = false;
+    ViewData["HideFooter"] = false;
+}
+
+@section Head {
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <meta name="description"
+          content="Kết nối với giáo viên tiếng Nhật được chứng nhận và đối tác ngôn ngữ. Tìm gia sư phù hợp cho các bài học cá nhân hóa và thực hành hội thoại tiếng Nhật." />
+}
+
+@section Styles {
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap" rel="stylesheet" />
+
+    <!-- CSS chung -->
+    <link rel="stylesheet" href="~/css/global.css" />
+
+    <!-- CSS riêng cho trang này -->
+    <link rel="stylesheet" href="~/css/styles.css" />
+    <link rel="stylesheet" href="~/css/partners.css" />
+    <link rel="stylesheet" href="~/css/footer.css" />
+}
+
+<main>
+    <!-- BEGIN: Development Banner -->
+    <section class="dev-banner d-flex align-items-center">
+        <div class="container d-flex align-items-center">
+            <img src="https://img.icons8.com/ios-filled/80/000000/robot.png"
+                 alt="Robot đang xây dựng"
+                 class="me-3 dev-banner-icon" />
+            <div>
+                <h4 class="dev-banner-title mb-1">🔧 Tính năng đang phát triển</h4>
+                <p class="dev-banner-text mb-0">
+                    Trang này hiện vẫn đang trong giai đoạn phát triển và nội dung chỉ mang tính <em>placeholder</em>.
+                    Cảm ơn bạn đã kiên nhẫn, chúng tôi sẽ cập nhật sớm!
+                </p>
+            </div>
+        </div>
+    </section>
+    <!-- Phần Hero -->
+    <section class="partners-hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    Hợp tác cùng chúng tôi để
+                    <span class="text-gradient">Kết nối Văn hóa</span>
+                </h1>
+                <p class="hero-description">
+                    Tham gia mạng lưới các tổ chức giáo dục, doanh nghiệp, và tổ chức văn hóa
+                    để mở rộng cơ hội học tiếng Nhật trên toàn thế giới. Cùng nhau, chúng ta tạo nên
+                    những cầu nối ý nghĩa giữa các nền văn hóa.
+                </p>
+                <div class="hero-actions">
+                    <button class="btn btn-primary" onclick="showPartnershipForm()">
+                        Trở thành Đối tác
+                    </button>
+                    <a href="#partnership-types" class="btn btn-outline">
+                        Tìm hiểu Hình thức hợp tác
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Các loại hợp tác -->
+    <section class="partnership-types-section" id="partnership-types">
+        <div class="container">
+            <h2 class="section-title">Cơ hội Hợp tác</h2>
+            <div class="partnership-grid">
+                <!-- Tổ chức Giáo dục -->
+                <div class="partnership-card">
+                    <div class="partnership-icon">🏫</div>
+                    <h3 class="partnership-title">Tổ chức Giáo dục</h3>
+                    <p class="partnership-description">
+                        Hợp tác với các trường đại học, trường học và tổ chức giáo dục
+                        để tích hợp chương trình học tiếng Nhật vào chương trình giảng dạy
+                        và cung cấp ưu đãi cho học sinh.
+                    </p>
+                    <h4>Lợi ích:</h4>
+                    <ul>
+                        <li>Giảm giá bản quyền theo số lượng lớn</li>
+                        <li>Phát triển chương trình học tùy chỉnh</li>
+                        <li>Chương trình đào tạo giáo viên</li>
+                        <li>Theo dõi tiến độ học tập của học viên</li>
+                    </ul>
+                    <button class="btn btn-outline"
+                            onclick="inquirePartnership('education')">
+                        Tìm hiểu thêm
+                    </button>
+                </div>
+
+                <!-- Đào tạo Doanh nghiệp -->
+                <div class="partnership-card">
+                    <div class="partnership-icon">🏢</div>
+                    <h3 class="partnership-title">Đào tạo Doanh nghiệp</h3>
+                    <p class="partnership-description">
+                        Cung cấp đào tạo tiếng Nhật cho doanh nghiệp hợp tác với
+                        các công ty Nhật Bản hoặc mở rộng thị trường Nhật Bản.
+                    </p>
+                    <h4>Lợi ích:</h4>
+                    <ul>
+                        <li>Chương trình học tập trung vào kinh doanh</li>
+                        <li>Lịch học linh hoạt</li>
+                        <li>Công cụ báo cáo cho doanh nghiệp</li>
+                        <li>Module đào tạo văn hóa</li>
+                    </ul>
+                    <button class="btn btn-outline"
+                            onclick="inquirePartnership('corporate')">
+                        Tìm hiểu thêm
+                    </button>
+                </div>
+
+                <!-- Tổ chức Văn hóa -->
+                <div class="partnership-card">
+                    <div class="partnership-icon">🌍</div>
+                    <h3 class="partnership-title">Tổ chức Văn hóa</h3>
+                    <p class="partnership-description">
+                        Hợp tác với trung tâm văn hóa, bảo tàng và tổ chức liên quan đến
+                        Nhật Bản để quảng bá văn hóa qua việc học ngôn ngữ.
+                    </p>
+                    <h4>Lợi ích:</h4>
+                    <ul>
+                        <li>Hội nhập nội dung văn hóa</li>
+                        <li>Hợp tác tổ chức sự kiện</li>
+                        <li>Cơ hội quảng bá chéo</li>
+                        <li>Chương trình tiếp cận cộng đồng</li>
+                    </ul>
+                    <button class="btn btn-outline"
+                            onclick="inquirePartnership('cultural')">
+                        Tìm hiểu thêm
+                    </button>
+                </div>
+
+                <!-- Đối tác Công nghệ -->
+                <div class="partnership-card">
+                    <div class="partnership-icon">💻</div>
+                    <h3 class="partnership-title">Đối tác Công nghệ</h3>
+                    <p class="partnership-description">
+                        Tích hợp với hệ thống quản lý học tập, nền tảng giáo dục và giải pháp
+                        công nghệ để nâng cao trải nghiệm học tập.
+                    </p>
+                    <h4>Lợi ích:</h4>
+                    <ul>
+                        <li>Hỗ trợ tích hợp API</li>
+                        <li>Tài liệu kỹ thuật</li>
+                        <li>Cơ hội đồng thương hiệu</li>
+                        <li>Chương trình chia sẻ doanh thu</li>
+                    </ul>
+                    <button class="btn btn-outline"
+                            onclick="inquirePartnership('technology')">
+                        Tìm hiểu thêm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Đối tác Tiêu biểu -->
+    <section class="featured-partners">
+        <div class="container">
+            <div class="section-header">
+                <h2>Đối tác Giảng dạy Tiêu biểu</h2>
+                <p>
+                    Gặp gỡ những giáo viên hàng đầu đã giúp hàng ngàn học viên
+                    chinh phục tiếng Nhật
+                </p>
+            </div>
+
+            <div class="featured-partners-grid" id="featuredPartnersGrid">
+                <!-- JavaScript sẽ load nội dung ở đây -->
+            </div>
+
+            <div class="view-all-partners">
+                <a href="#directory" class="btn btn-primary btn-lg">
+                    Xem tất cả Đối tác
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Danh bạ Đối tác -->
+    <section class="partners-directory" id="directory">
+        <div class="container">
+            <div class="section-header">
+                <h2>Danh bạ Giáo viên</h2>
+                <p>
+                    Duyệt danh sách đầy đủ các giáo viên và đối tác ngôn ngữ
+                    tiếng Nhật được chứng nhận của chúng tôi
+                </p>
+            </div>
+
+            <!-- Bộ lọc -->
+            <div class="directory-filters">
+                <div class="container">
+                    <div class="filters-container">
+                        <div class="filters-group">
+                            <select id="expertiseFilter" class="filter-select">
+                                <option value="">Chọn chuyên môn</option>
+                                <option value="Business Japanese Expert">
+                                    Tiếng Nhật Thương mại
+                                </option>
+                                <option value="Conversation Specialist">
+                                    Chuyên gia Hội thoại
+                                </option>
+                                <option value="JLPT Preparation">
+                                    Luyện thi JLPT
+                                </option>
+                                <option value="Grammar Specialist">
+                                    Chuyên gia Ngữ pháp
+                                </option>
+                                <option value="Cultural Studies">
+                                    Nghiên cứu Văn hóa
+                                </option>
+                                <option value="Test Preparation">
+                                    Luyện thi
+                                </option>
+                                <option value="Travel Japanese">
+                                    Tiếng Nhật Du lịch
+                                </option>
+                                <option value="Pronunciation">
+                                    Phát âm
+                                </option>
+                            </select>
+
+                            <select id="ratingFilter" class="filter-select">
+                                <option value="">Chọn đánh giá</option>
+                                <option value="4.8">4.8+ sao</option>
+                                <option value="4.5">4.5+ sao</option>
+                                <option value="4.0">4.0+ sao</option>
+                            </select>
+
+                            <select id="availabilityFilter" class="filter-select">
+                                <option value="">Tất cả tình trạng</option>
+                                <option value="Available">Đang nhận học viên</option>
+                                <option value="Busy">Chờ danh sách đợi</option>
+                            </select>
+                        </div>
+
+                        <div class="search-container">
+                            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="m21 21-4.35-4.35" />
+                            </svg>
+                            <input type="text"
+                                   id="partnerSearch"
+                                   class="search-input"
+                                   placeholder="Tìm kiếm theo tên hoặc chuyên môn..." />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="partners-grid" id="partnersGrid">
+                <!-- JavaScript sẽ load nội dung ở đây -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Biểu mẫu Hợp tác -->
+    <section class="partnership-form-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Sẵn sàng Hợp tác?</h2>
+                <p>
+                    Tham gia cộng đồng giáo viên tiếng Nhật của chúng tôi và chia sẻ
+                    kiến thức với học viên trên toàn thế giới
+                </p>
+            </div>
+
+            <div class="form-container">
+                <form id="partnershipForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="teacherName" class="form-label">
+                                Họ và tên *
+                            </label>
+                            <input type="text"
+                                   id="teacherName"
+                                   name="teacherName"
+                                   class="form-input"
+                                   required />
+                        </div>
+                        <!-- Thêm các trường khác tương tự -->
+                    </div>
+                    <div class="form-actions text-center mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            Gửi Yêu cầu Hợp tác
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="contact-info mt-4">
+                <h3>Liên hệ trực tiếp</h3>
+                <p><strong>Email:</strong> partnerships@nihongosekai.com</p>
+                <p><strong>Điện thoại:</strong> +1 (555) 123-4569</p>
+                <p><strong>Thời gian phản hồi:</strong> Trong vòng 24 giờ</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- Modal Chat (nếu cần) -->
+<div class="chat-modal" id="chatModal">
+    <div class="chat-modal-content">
+        <!-- Nội dung chat -->
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/global.js"></script>
+    <script src="~/js/partners.js"></script>
+}

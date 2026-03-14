@@ -1,0 +1,30 @@
+﻿@using JapaneseLearningPlatform.Models
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Lỗi";
+}
+
+@section Styles {
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap" rel="stylesheet" />
+}
+
+<h1 class="text-danger">Lỗi.</h1>
+<h2 class="text-danger">Đã xảy ra lỗi khi xử lý yêu cầu của bạn.</h2>
+
+@if (Model.ShowRequestId)
+{
+    <p>
+        <strong>Mã yêu cầu:</strong> <code>@Model.RequestId</code>
+    </p>
+}
+
+<h3>Chế độ Phát triển</h3>
+<p>
+    Chuyển sang môi trường <strong>Phát triển</strong> sẽ hiển thị thông tin chi tiết hơn về lỗi đã xảy ra.
+</p>
+<p>
+    <strong>Không nên bật chế độ Phát triển cho các ứng dụng đã triển khai.</strong>
+    Điều này có thể dẫn đến việc hiển thị thông tin nhạy cảm từ các ngoại lệ cho người dùng cuối.
+    Để gỡ lỗi cục bộ, hãy bật môi trường <strong>Phát triển</strong> bằng cách đặt biến môi trường <strong>ASPNETCORE_ENVIRONMENT</strong> thành <strong>Development</strong> và khởi động lại ứng dụng.
+</p>

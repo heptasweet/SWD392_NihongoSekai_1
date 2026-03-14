@@ -1,0 +1,16 @@
+﻿@model string;
+
+@section Styles {
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap" rel="stylesheet" />
+}
+
+@if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+{
+    <div class="fab-wrapper" style="margin: 15px 0;">
+        <a asp-controller="@Model" asp-action="Create" class="fab-button">
+            <span class="fab-icon"><i class="bi bi-plus"></i></span>
+            <span class="fab-label">Thêm mục mới</span>
+        </a>
+    </div>
+}
