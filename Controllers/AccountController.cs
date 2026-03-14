@@ -483,11 +483,6 @@ namespace JapaneseLearningPlatform.Controllers
         }
 
         // Xem danh sách users (ví dụ admin)
-        public async Task<IActionResult> Users()
-        {
-            var users = await _context.Users.ToListAsync();
-            return View(users);
-        }
 
         // Khi truy cập denied
         public IActionResult AccessDenied(string returnUrl) => View();
