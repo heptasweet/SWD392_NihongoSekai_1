@@ -1,0 +1,870 @@
+﻿﻿@using JapaneseLearningPlatform.Data.ViewModels
+@using JapaneseLearningPlatform.Data.Enums
+@using JapaneseLearningPlatform.Data
+@model CourseHierarchyVM
+@Html.AntiForgeryToken()
+@functions {
+    public string ToEmbedUrl(string url)
+    {
+        if (string.IsNullOrWhiteSpace(url)) return "";
+        if (!url.Contains("watch?v=")) return url;
+        var videoId = url.Split("watch?v=")[1].Split('&')[0];
+        return $"https://www.youtube.com/embed/{videoId}";
+    }
+}
+
+@{
+    ViewData["Title"] = "Chi tiết khóa học";
+    var firstVideoUrl = Model.Sections?
+        .SelectMany(s => s.ContentItems)
+        .FirstOrDefault(ci => ci.ContentType == ContentType.Video)?.Video?.VideoURL;
+
+    var defaultEmbed = ToEmbedUrl(firstVideoUrl ?? "");
+}
+
+<style>
+    /* thanh breakdown (5→1 sao) */
+    .ratings-section .progress {
+        background-color: #e9ecef; /* màu nền vạch trắng nhạt */
+    }
+
+    .ratings-section .progress-bar {
+        background-color: #f5365c !important; /* hoặc #ffc107 (vàng) để nổi bật */
+    }
+
+    /* ========== LAYOUT ========== */
+    .course-layout {
+        display: grid;
+        grid-template-columns: 75% 25%;
+        align-items: flex-start;
+        gap: 32px;
+    }
+
+    /* ========== VIDEO SECTION ========== */
+    .video-section iframe {
+        border-radius: 12px;
+        border: 3px solid #f5365c;
+        box-shadow: 0 0 12px rgba(245, 54, 92, 0.3);
+    }
+
+    .video-section h2,
+    .sidebar-section h2 {
+        color: #f5365c;
+    }
+
+    /* ========== SIDEBAR SECTION ========== */
+    .sidebar-section {
+        width: 100%;
+        max-width: 500px;
+        position: sticky;
+        top: 100px;
+        padding: 16px;
+        background-color: #fff;
+        border: 2px solid #f5365c;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(245, 54, 92, 0.1);
+        max-height: calc(100vh - 150px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        word-break: break-word;
+    }
+
+        .sidebar-section .btn {
+            padding: 4px 8px;
+            font-size: 0.85rem;
+        }
+
+    /* ========== ACCORDION ========== */
+    .accordion-item {
+        border: 1px solid #f5365c;
+        border-radius: 6px;
+    }
+
+    .accordion-button {
+        background-color: #fef2f4;
+        color: #f5365c;
+        font-weight: 600;
+        transition: background-color 0.3s ease;
+    }
+
+        .accordion-button:not(.collapsed) {
+            background-color: #f5365c;
+            color: #fff;
+        }
+
+    .accordion-body {
+        background-color: #fff;
+    }
+
+        .accordion-body .d-flex {
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+            .accordion-body .d-flex > div {
+                flex: 1 1 auto;
+                min-width: 100px;
+            }
+
+    /* ========== BUTTONS ========== */
+    .btn-nihongo,
+    .btn-nihongo-outline {
+        border: none;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-nihongo {
+        background-color: #f5365c;
+        color: #fff;
+    }
+
+        .btn-nihongo:hover {
+            background-color: #d52d50;
+        }
+
+    .btn-nihongo-outline {
+        background-color: transparent;
+        color: #f5365c;
+        border: 2px solid #f5365c;
+    }
+
+        .btn-nihongo-outline:hover {
+            background-color: #f5365c;
+            color: #fff;
+        }
+
+    /* ========== BADGE ========== */
+    .badge-nihongo {
+        background-color: #f5365c;
+        color: #fff;
+        font-weight: 600;
+        border-radius: 5px;
+        padding: 4px 8px;
+        font-size: 0.85rem;
+    }
+
+    /* ========== LIST GROUP ========== */
+    .list-group-item {
+        border-left: 4px solid #f5365c;
+        background-color: #fff;
+        border-radius: 0;
+    }
+
+    /* ========== LINKS ========== */
+    .play-video-link {
+        color: #f5365c;
+    }
+
+        .play-video-link:hover {
+            text-decoration: underline;
+        }
+
+    /* ========== CONTAINER ========== */
+    .container {
+        max-width: 100% !important;
+        padding: 0 40px;
+    }
+
+
+
+    /* text-secondary = màu xám, text-warning = vàng (bootstrap) */
+    .star-input {
+        transition: color .2s;
+    }
+
+        .star-input.text-secondary {
+            color: #adb5bd;
+        }
+        /* hoặc bất cứ */
+        .star-input.text-warning {
+            color: #ffc107;
+        }
+    /* vàng bootstrap */
+
+    /* Ứng với phần progress bar ở trang Detail */
+    .progress.sticky-progress {
+        position: sticky;
+        top: 0px; /* giữ cách trên cùng 100px (bạn có thể chỉnh lại) */
+        z-index: 10; /* đảm bảo nó nổi trên các phần tử khác */
+        /* background: #fff; /* thêm nền nếu cần, tránh chữ bị lọt ra sau */ */
+        padding: 4px 0; /* tuỳ chỉnh đệm cho đẹp */
+    }
+
+    /* Pulse animation cho nút */
+    @@keyframes pulse {
+        0%
+
+    {
+        box-shadow: 0 0 0 0 rgba(245,54,92, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(245,54,92, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(245,54,92, 0);
+    }
+
+    }
+
+    .btn-nihongo.pulse {
+        position: relative;
+        animation: pulse 2s infinite;
+    }
+
+    /* Subtext dưới nút */
+    .cta-subtext {
+        font-size: 0.85rem;
+        opacity: 0.8;
+    }
+
+    /* Chevron rotate & transition */
+    .accordion-chevron {
+        transition: transform 0.3s ease;
+        font-size: 1.25rem;
+        color: #f5365c;
+    }
+    /* Khi mở (button không còn .collapsed) */
+    .accordion-button:not(.collapsed) .accordion-chevron {
+        transform: rotate(180deg);
+    }
+
+    /* Smooth collapse height */
+    .accordion-collapse {
+        transition: height 0.4s ease;
+    }
+
+    /* Floating label styling (Bootstrap 5) */
+    /* Star hover effect */
+    .star-input {
+        font-size: 1.5rem;
+        transition: transform .2s, color .2s;
+        cursor: pointer;
+    }
+
+        .star-input:hover {
+            transform: scale(1.2);
+            color: #ffc107;
+        }
+
+    /* Disable button opacity */
+    #submit-review:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+</style>
+
+
+<div class="container mt-4">
+    <div class="course-layout">
+        <div class="video-section">
+            <iframe id="mainVideoPlayer"
+                    class="rounded"
+                    src="@defaultEmbed"
+                    allowfullscreen
+                    style="width:97%; height:600px;">
+            </iframe>
+
+            <h2 class="fw-bold">@Model.Course.Name</h2>
+            <p class="text-muted mb-2">@Model.Course.Description</p>
+            <h3 class="fw-bold">Mô tả</h3>
+            <p id="videoDescription" class="text-muted mb-2">@Model.Video?.VideoDescription</p>
+            <p class="mb-1"><strong>Loại:</strong> @Model.Course.CourseCategory.GetDisplayName()</p>
+            <p class="mb-1"><strong>Hạn áp dụng giảm giá:</strong> @Model.Course.StartDate?.ToString("dd MMM yyyy")</p>
+            <p class="mb-3"><strong>Hạn kết thúc giảm giá:</strong> @Model.Course.EndDate?.ToString("dd MMM yyyy")</p>
+            @if (!Model.IsPurchased && Model.Course.DiscountPercent != null && Model.Course.StartDate <= DateTime.Now && Model.Course.EndDate >= DateTime.Now)
+            {
+                <p class="text-danger">
+                    <del>@Model.Course.Price.ToString("N0") ₫</del>
+                    <strong>@Model.Course.FinalPrice.ToString("N0") ₫</strong>
+                    <span class="badge badge-nihongo">@Model.Course.DiscountPercent% OFF</span>
+                </p>
+            }
+
+            @if (!Model.IsPurchased && !User.IsInRole("Admin") && DateTime.Now <= Model.Course.EndDate && !Model.IsInCart)
+            {
+                <div class="cta-wrapper mt-2">
+                    <a class="btn btn-nihongo pulse"
+                       asp-controller="Orders" asp-action="AddItemToShoppingCart" asp-route-id="@Model.Course.Id">
+                        <i class="bi bi-cart-plus me-1"></i> Mua với @Model.Course.FinalPrice.ToString("N0") ₫
+                    </a>
+                    <small class="cta-subtext d-block mt-1 text-muted">
+                        Bảo đảm hoàn tiền 7 ngày nếu không hài lòng
+                    </small>
+                </div>
+            }
+
+            else if (Model.IsInCart)
+            {
+                <button asp-controller="Orders" asp-action="ShoppingCart" class="btn btn-warning mt-2 disabled">
+                    <i class="bi bi-cart-check"></i> Trong giỏ hàng
+                </button>
+            }
+
+            <div class="mt-4">
+                <a asp-action="Index" class="btn btn-nihongo-outline">
+                    <i class="bi bi-arrow-left-circle"></i> Trở về danh sách khóa học
+                </a>
+            </div>
+
+            <hr class="my-5" />
+
+            <div class="ratings-section mb-5">
+                <h3>Đánh giá khóa học</h3>
+
+                <!-- Tổng quan đánh giá -->
+                <div class="d-flex align-items-center mt-3 mb-3">
+                    <h4 class="text-danger me-3">
+                        @Model.AverageRating.ToString("0.0") / 5 (@Model.TotalRatings đánh giá)
+                    </h4>
+                    <div>
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            var iconClass = i <= Math.Round(Model.AverageRating) ? "bi-star-fill" : "bi-star";
+                            <i class="bi @iconClass text-warning"></i>
+                        }
+                    </div>
+                </div>
+
+                <!-- Phân bổ sao với progress bars -->
+                <div class="mt-3">
+                    @for (int stars = 5; stars >= 1; stars--)
+                    {
+                        var count = Model.RatingCounts.GetValueOrDefault(stars, 0);
+                        var percent = Model.TotalRatings > 0
+                        ? count * 100.0 / Model.TotalRatings
+                        : 0;
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="me-2">
+                                @stars <i class="bi bi-star-fill text-warning"></i>
+                            </span>
+                            <div class="flex-fill">
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar"
+                                         style="width:@percent%"
+                                         aria-valuenow="@count"
+                                         aria-valuemin="0"
+                                         aria-valuemax="@Model.TotalRatings">
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="ms-2">(@count)</span>
+                        </div>
+                    }
+                </div>
+
+                <h5 class="mt-4">Bình luận mới nhất</h5>
+                <div id="latest-comments">
+                    <!-- JS sẽ inject cards vào đây -->
+                </div>
+
+
+
+                <!-- Sắp xếp và Xem thêm -->
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <label class="me-2">Sắp xếp:</label>
+                        <select id="sort-comments"
+                                class="form-select form-select-sm d-inline-block w-auto">
+                            <option value="Newest">Mới nhất</option>
+                            <option value="Oldest">Cũ nhất</option>
+                            <option value="RatingHigh">Sao cao→thấp</option>
+                            <option value="RatingLow">Sao thấp→cao</option>
+                        </select>
+                    </div>
+                    <button id="view-more" class="btn btn-link">Xem thêm</button>
+                </div>
+            </div>
+            
+
+            @if (Model.ProgressPercent >= 100)
+            {
+                @* Chỉ khi đã 100% *@
+                @if (!Model.HasReviewed)
+                {
+                    <div class="review-form mb-5">
+                        <h5>Viết đánh giá của bạn</h5>
+
+                        <!-- Star inputs (giữ nguyên markup) -->
+                        <div id="star-inputs" class="mb-2">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="bi bi-star text-secondary star-input"
+                                   data-value="@i"
+                                   aria-label="@i sao"
+                                   role="button"></i>
+                            }
+                        </div>
+
+                        <!-- Floating Label Container -->
+                        <div class="form-floating mb-1">
+                            <textarea id="comment-text"
+                              class="form-control"
+                              placeholder="Viết bình luận..."
+                              minlength="10"
+                              style="height:100px"
+                              required></textarea>
+                            <label for="comment-text">Bình luận (tối thiểu 10 ký tự)</label>
+                            <div class="invalid-feedback">
+                                Vui lòng nhập ít nhất 10 ký tự.
+                            </div>
+                        </div>
+
+                        <!-- Char counter -->
+                        <div class="d-flex justify-content-between mb-3">
+                            <small id="charCount" class="text-muted">0/500 ký tự</small>
+                        </div>
+
+                        <button id="submit-review"
+                                class="btn btn-primary d-flex align-items-center"
+                                disabled>
+                            <span id="submitText">Gửi đánh giá</span>
+                            <div id="submitSpinner" class="spinner-border spinner-border-sm ms-2" role="status" style="display:none;">
+                                <span class="visually-hidden">Đang gửi…</span>
+                            </div>
+                        </button>
+                    </div>
+
+                }
+                else
+                {
+                    <div class="alert alert-info mb-5">
+                        Bạn đã gửi đánh giá cho khoá học này. Cảm ơn bạn!
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="alert alert-warning mb-5">
+                    Hoàn thành 100% khoá học để có thể gửi đánh giá.
+                </div>
+            }
+
+
+        </div>
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="sidebar-section">
+                <a asp-controller="CourseSections" asp-action="Create" asp-route-courseId="@Model.Course.Id"
+                   class="btn btn-sm btn-nihongo-outline mb-3">
+                    <i class="bi bi-plus-circle"></i> Thêm mục
+                </a>
+                <h5 class="fw-semibold mb-3">Nội dung khóa học</h5>
+                <div class="accordion" id="courseSectionsAccordion">
+                    @for (int i = 0; i < Model.Sections.Count; i++)
+                    {
+                        var sections = Model.Sections[i];
+                        var headingId = $"heading{i}";
+                        var collapseId = $"collapse{i}";
+
+                        <div class="accordion-item mb-2">
+                            <h2 class="accordion-header" id="@headingId">
+                                <button class="accordion-button collapsed d-flex align-items-center" type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#@collapseId"
+                                        aria-expanded="false"
+                                        aria-controls="@collapseId">
+                                    <span class="flex-grow-1">@sections.Title</span>
+                                    <i class="bi bi-chevron-down accordion-chevron"></i>
+                                </button>
+                            </h2>
+
+                            <div id="@collapseId" class="accordion-collapse collapse" aria-labelledby="@headingId" data-bs-parent="#courseSectionsAccordion">
+                                <div class="accordion-body">
+                                    <div class="btn-group d-flex flex-wrap mb-3" role="group">
+                                        <a asp-controller="CourseContentItems" asp-action="Create"
+                                           asp-route-courseId="@Model.Course.Id"
+                                           asp-route-sectionId="@sections.Id"
+                                           class="btn btn-sm btn-nihongo-outline">
+                                            <i class="bi bi-plus-circle"></i>Thêm nội dung
+                                        </a>
+                                        <a asp-controller="CourseSections" asp-action="Edit"
+                                           asp-route-id="@sections.Id"
+                                           class="btn btn-sm btn-nihongo-outline">
+                                            <i class="bi bi-pencil"></i>Sửa tên mục
+                                        </a>
+                                        <a asp-controller="CourseSections" asp-action="Delete"
+                                           asp-route-id="@sections.Id"
+                                           class="btn btn-sm btn-nihongo-outline"
+                                           onclick="return confirm('Bạn có chắc xóa mục này chứ (Trong mục bao gồm nội dung sẽ mất)?');">
+                                            <i class="bi bi-trash"></i> Xóa mục
+                                        </a>
+
+
+                                    </div>
+                                    <ul class="list-group list-group-flush">
+                                        @foreach (var item in sections.ContentItems)
+                                        {
+                                            <li class="list-group-item">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div>
+                                                        @if (item.ContentType == ContentType.Video && item.Video != null)
+                                                        {
+                                                            <a href="javascript:void(0);"
+                                                               class="play-video-link text-decoration-none text-dark fw-semibold"
+                                                               data-video-url="@ToEmbedUrl(item.Video.VideoURL)"
+                                                               data-description="@item.Video.VideoDescription">
+                                                                ▶ @item.Title
+                                                            </a>
+                                                        }
+                                                        else if (item.ContentType == ContentType.Quiz && item.Quiz != null)
+                                                        {
+                                                            <div>
+                                                                <a asp-controller="Quizzes" asp-action="Manage" asp-route-id="@item.Quiz.Id" class="btn btn-sm btn-nihongo-outline">
+                                                                    Quản lý Q&A
+                                                                </a>
+                                                            </div>
+                                                            <div>
+                                                                <a asp-action="Preview" asp-controller="Quizzes" asp-route-id="@item.Quiz.Id" class="btn btn-nihongo-outline">
+                                                                    Xem trước Quiz
+                                                                </a>
+                                                            </div>
+                                                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                                                <a asp-controller="Quizzes" asp-action="Start" asp-route-id="@item.Quiz.Id"
+                                                                   class="btn btn-sm btn-outline-primary">
+                                                                    <i class="bi bi-pencil-square"></i> Bắt đầu Quiz
+                                                                </a>
+                                                                @if (Model.QuizHighScores?.TryGetValue(item.Quiz.Id, out var score) == true)
+                                                                {
+                                                                    <span class="badge bg-success">🏆 @score</span>
+                                                                }
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                    <div class="btn-group d-flex flex-wrap mb-3" role="group">
+                                                        <div>
+                                                            <a asp-controller="CourseContentItems" asp-action="Edit" asp-route-id="@item.Id"
+                                                               class="btn btn-sm btn-nihongo-outline me-1">
+                                                                <i class="bi bi-pencil"></i>Sửa nội dung
+                                                            </a>
+                                                        </div>
+                                                        <div>
+                                                            <a asp-controller="CourseContentItems" asp-action="Delete" asp-route-id="@item.Id"
+                                                               class="btn btn-sm btn-nihongo-outline"
+                                                               onclick="return confirm('Bạn có chắc muốn xóa nội dung này chứ?');">
+                                                                <i class="bi bi-trash"></i>Xóa nội dung
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        @if ((Model.IsPurchased && User.IsInRole("Learner")) && Model.Sections != null && Model.Sections.Any())
+        {
+            <div class="sidebar-section">
+                <div class="progress mt-3 sticky-progress" style="height: 20px;">
+                    <div id="mainProgressBar" class="progress-bar bg-danger" role="progressbar"
+                         style="width:@Model.ProgressPercent%"
+                         aria-valuenow="@Model.ProgressPercent"
+                         aria-valuemin="0" aria-valuemax="100">
+                        @Model.ProgressPercent.ToString("0")%                        
+                    </div>
+                </div>
+
+                <h5 class="fw-semibold mb-3">Nội dung khóa học</h5>                
+                <div class="accordion" id="courseSectionsAccordion">
+                    @for (int i = 0; i < Model.Sections.Count; i++)
+                    {
+                        var sections = Model.Sections[i];
+                        var headingId = $"heading{i}";
+                        var collapseId = $"collapse{i}";
+
+                        <div class="accordion-item mb-2">
+                            <h2 class="accordion-header" id="@headingId">
+                                <button class="accordion-button collapsed" type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#@collapseId"
+                                        aria-expanded="false"
+                                        aria-controls="@collapseId">
+                                    @sections.Title
+                                </button>
+                            </h2>
+
+                            <div id="@collapseId" class="accordion-collapse collapse" aria-labelledby="@headingId" data-bs-parent="#courseSectionsAccordion">
+                                <div class="accordion-body">
+                                    <ul class="list-group list-group-flush">
+                                        @foreach (var item in sections.ContentItems)
+                                        {
+                                            <li class="list-group-item">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div>
+                                                        @if (item.ContentType == ContentType.Video && item.Video != null)
+                                                        {
+                                                            <input type="checkbox"
+                                                                   class="me-2 content-checkbox"
+                                                                   data-content-id="@item.Id"
+                                                                   @(Model.CompletedContentIds.Contains(item.Id) ? "checked" : "")
+                                                                   @(Model.ProgressPercent >= 100 ? "disabled" : "") />
+
+                                                            <a href="javascript:void(0);"
+                                                               class="play-video-link text-decoration-none text-dark fw-semibold"
+                                                               data-video-url="@ToEmbedUrl(item.Video.VideoURL)"
+                                                               data-description="@item.Video.VideoDescription">
+                                                                ▶ @item.Title
+                                                            </a>
+                                                        }
+                                                        else if (item.ContentType == ContentType.Quiz && item.Quiz != null)
+                                                        {
+                                                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                                                <a asp-controller="Quizzes" asp-action="Start" asp-route-id="@item.Quiz.Id"
+                                                                   class="btn btn-sm btn-outline-primary">
+                                                                    <i class="bi bi-pencil-square"></i> Bắt đầu Quiz
+                                                                </a>
+                                                                @if (Model.QuizHighScores?.TryGetValue(item.Quiz.Id, out var score) == true)
+                                                                {
+                                                                    <span class="badge bg-success">🏆 @score</span>
+                                                                }
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else if (!User.IsInRole("Admin"))
+        {
+            <div class="sidebar-section">
+                <h2 class="fw-bold"> Video xem trước </h2>
+            </div>
+
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const courseId      = @Model.Course.Id;
+            const progress      = @Model.ProgressPercent;
+            const contentBoxes  = document.querySelectorAll('.content-checkbox');
+            const player        = document.getElementById('mainVideoPlayer');
+            const description   = document.getElementById('videoDescription');
+            const mainBar       = document.getElementById('mainProgressBar');
+            const starInputs    = document.querySelectorAll('.star-input');
+            const commentText   = document.getElementById('comment-text');
+            const charCount     = document.getElementById('charCount');
+            const submitBtn     = document.getElementById('submit-review');
+            const submitText    = document.getElementById('submitText');
+            const submitSpinner = document.getElementById('submitSpinner');
+            let selectedStars   = 0;
+            let page            = 1;
+            const pageSize      = 5;
+
+            // ==== PROGRESS BAR ====
+            function updateProgressBar(percent) {
+                if (!mainBar) return;
+                const rounded = Math.round(percent);
+                mainBar.style.width = rounded + '%';
+                mainBar.setAttribute('aria-valuenow', rounded);
+                mainBar.textContent = rounded + '%';
+            }
+            updateProgressBar(progress);
+            if (progress >= 100) contentBoxes.forEach(cb => cb.disabled = true);
+
+            // ==== CHECKBOX TOGGLE ====
+            contentBoxes.forEach(cb => cb.addEventListener('change', async function () {
+                const payload = {
+                    courseId: @Model.Course.Id,
+                    contentItemId: this.dataset.contentId,
+                    isCompleted: this.checked
+                };
+                try {
+                    const res = await fetch('/Courses/ToggleContentCompletion', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        updateProgressBar(data.progress);
+                        if (data.progress >= 100) {
+                            contentBoxes.forEach(x => x.disabled = true);
+                            Swal.fire('🎉 Chúc mừng!', 'Bạn đã hoàn thành 100% khoá học này.', 'success');
+                        }
+                    } else {
+                        this.checked = !this.checked;
+                    }
+                } catch {
+                    this.checked = !this.checked;
+                    Swal.fire('Lỗi', 'Không cập nhật được tiến độ, vui lòng thử lại.', 'error');
+                }
+            }));
+
+            // ==== VIDEO LINKS ====
+            document.querySelectorAll('.play-video-link').forEach(link =>
+                link.addEventListener('click', function () {
+                    const url  = this.dataset.videoUrl;
+                    const desc = this.dataset.description;
+                    if (url) player.src = url;
+                    if (desc && description) description.textContent = desc;
+                })
+            );
+
+            // ==== RATING STATS ====
+            function loadStats() {
+                fetch(`/api/CourseRatings/Stats/${courseId}`)
+                    .then(r => r.json())
+                    .then(s => {
+                        const ratingHeader = document.querySelector('.ratings-section h4');
+                        if (ratingHeader)
+                            ratingHeader.textContent = `${s.avg.toFixed(1)} / 5 (${s.total} đánh giá)`;
+
+                        const stars = document.querySelectorAll('.ratings-section h4 + div i');
+                        stars.forEach((star, i) => {
+                            star.classList.toggle('bi-star-fill', i < Math.round(s.avg));
+                            star.classList.toggle('bi-star', i >= Math.round(s.avg));
+                        });
+
+                        document.querySelectorAll('.ratings-section .progress-bar')
+                            .forEach((bar, idx) => {
+                                const star = 5 - idx;
+                                const cnt = s.counts[star] || 0;
+                                const pct = s.total ? Math.round(cnt * 100 / s.total) : 0;
+                                bar.style.width = pct + '%';
+                                bar.setAttribute('aria-valuenow', cnt);
+                                bar.closest('.d-flex').querySelector('span.ms-2').textContent = `(${cnt})`;
+                            });
+                    });
+            }
+
+            // ==== COMMENTS ====
+            function renderComments(list, append = false) {
+                const ctn = document.getElementById('latest-comments');
+                if (!ctn) return;
+                if (!append) ctn.innerHTML = '';
+                list.forEach(c => {
+                    const card = document.createElement('div');
+                    card.className = 'card mb-3';
+                    card.innerHTML = `
+                        <div class="card-body">
+                            <div class="d-flex mb-2">
+                                <img src="${c.avatarUrl || '/images/default-avatar.png'}"
+                                     class="rounded-circle me-2" style="width:32px;height:32px;" alt="Avatar"/>
+                                <strong>${c.userName}</strong>
+                                <small class="text-muted ms-auto">${c.date}</small>
+                            </div>
+                            <div class="mb-2">
+                                ${[1, 2, 3, 4, 5].map(i =>
+                                    `<i class="bi ${i <= c.rating ? 'bi-star-fill' : 'bi-star'} text-warning"></i>`
+                                ).join('')}
+                            </div>
+                            <p class="mb-0">${c.comment}</p>
+                        </div>`;
+                    ctn.appendChild(card);
+                });
+                document.getElementById('view-more').style.display = list.length < pageSize ? 'none' : '';
+            }
+            function loadComments(reset = false) {
+                if (reset) page = 1;
+                const sort = document.getElementById('sort-comments').value;
+                fetch(`/api/CourseRatings/Comments/${courseId}?pageSize=${pageSize}&page=${page}&sort=${sort}`)
+                    .then(r => r.json())
+                    .then(list => renderComments(list, !reset));
+            }
+
+            // ==== STAR INPUT ====
+            function updateState() {
+                const validText = commentText && commentText.value.length >= 10;
+                if (submitBtn) submitBtn.disabled = !(selectedStars > 0 && validText);
+            }
+            starInputs.forEach((star, idx) => {
+                star.addEventListener('mouseover', () => {
+                    starInputs.forEach((s, j) => s.classList.toggle('text-warning', j <= idx));
+                });
+                star.addEventListener('click', () => {
+                    selectedStars = idx + 1;
+                    starInputs.forEach((s, j) => {
+                        s.classList.toggle('bi-star-fill', j < selectedStars);
+                        s.classList.toggle('bi-star', j >= selectedStars);
+                        s.classList.toggle('text-warning', j < selectedStars);
+                        s.classList.toggle('text-secondary', j >= selectedStars);
+                    });
+                    updateState();
+                });
+            });
+            if (commentText) {
+                commentText.addEventListener('input', () => {
+                    const len = commentText.value.length;
+                    charCount.textContent = `${len}/500 ký tự`;
+                    commentText.classList.toggle('is-invalid', len < 10);
+                    updateState();
+                });
+            }
+
+            // ==== SUBMIT REVIEW ====
+            if (submitBtn) {
+                submitBtn.addEventListener('click', () => {
+                    const comment = commentText.value.trim();
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                    if (!selectedStars) {
+                        return Swal.fire('Chưa chọn sao', 'Vui lòng chọn số sao trước khi gửi.', 'warning');
+                    }
+                    submitBtn.disabled = true;
+                    submitText.textContent = 'Đang gửi…';
+                    submitSpinner.style.display = 'inline-block';
+
+                    fetch('/api/CourseRatings', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': token
+                        },
+                        body: JSON.stringify({ courseId, stars: selectedStars, comment })
+                    })
+                    .then(r => {
+                        if (!r.ok) throw new Error();
+                        return r.json();
+                    })
+                    .then(x => {
+                        Swal.fire('Cảm ơn!', x.message, 'success').then(() => {
+                            selectedStars = 0;
+                            commentText.value = '';
+                            starInputs.forEach(s => {
+                                s.classList.replace('bi-star-fill', 'bi-star');
+                                s.classList.replace('text-warning', 'text-secondary');
+                            });
+                            updateState();
+                            loadStats();
+                            loadComments(true);
+                        });
+                    })
+                    .catch(() => Swal.fire('Lỗi', 'Gửi đánh giá thất bại. Vui lòng thử lại.', 'error'))
+                    .finally(() => {
+                        submitText.textContent = 'Gửi đánh giá';
+                        submitSpinner.style.display = 'none';
+                        submitBtn.disabled = false;
+                    });
+                });
+            }
+
+            // ==== INIT LOAD ====
+            loadStats();
+            loadComments(true);
+            document.getElementById('sort-comments')?.addEventListener('change', () => loadComments(true));
+            document.getElementById('view-more')?.addEventListener('click', () => { page++; loadComments(); });
+            updateState();
+        });
+    </script>
+}
+

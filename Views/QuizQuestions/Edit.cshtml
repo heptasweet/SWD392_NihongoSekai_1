@@ -1,0 +1,52 @@
+﻿@using JapaneseLearningPlatform.Data.Enums
+@using JapaneseLearningPlatform.Data.ViewModels
+@model QuizQuestionFormVM
+@{
+    ViewData["Title"] = Model.QuestionId.HasValue ? "Sửa câu hỏi" : "Tạo câu hỏi";
+    var isEdit = Model.QuestionId.HasValue;
+}
+
+<div class="container py-4">
+    <h2 class="text-danger fw-bold mb-4">@ViewData["Title"]</h2>
+
+    <form asp-action="Save" method="post" class="border rounded p-4 shadow-sm bg-white">
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" asp-for="QuestionId" />
+        <input type="hidden" asp-for="QuizId" />
+
+        <div class="mb-3">
+            <label asp-for="QuestionText" class="form-label fw-semibold text-dark">Câu hỏi</label>
+            <input asp-for="QuestionText" class="form-control border border-danger" />
+            <span asp-validation-for="QuestionText" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="QuestionType" class="form-label fw-semibold text-dark">Loại câu hỏi</label>
+            <select asp-for="QuestionType" class="form-select border border-danger" asp-items="Html.GetEnumSelectList<QuestionType>()"></select>
+        </div>
+
+        <hr />
+        <h5 class="fw-bold text-danger">Các phương án</h5>
+
+        <div id="option-list">
+            <!-- Options will be rendered here by JavaScript -->
+            @* Initial rendering of options is handled by JavaScript *@
+        </div>
+
+        <button type="button" class="btn btn-secondary mt-3" onclick="addOption()">+ Thêm phương án</button>
+
+        <div class="mt-4 d-flex gap-3">
+            <button type="submit" class="btn btn-danger px-4">Lưu</button>
+            <a asp-action="Manage" asp-controller="Quizzes" asp-route-id="@Model.QuizId" class="btn btn-outline-dark">Hủy</a>
+        </div>
+    </form>
+</div>
+<script src="~/js/quiz-question-form.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const options = @Html.Raw(Json.Serialize(Model.Options));
+        const type = '@Model.QuestionType';
+        initQuizForm(options, type);
+    });
+</script>
