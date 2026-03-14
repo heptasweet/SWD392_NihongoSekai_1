@@ -1,0 +1,159 @@
+﻿@model JapaneseLearningPlatform.Data.ViewModels.EditProfileVM
+
+@{
+    ViewData["Title"] = "Chỉnh sửa hồ sơ";
+    Layout = "_Layout";
+}
+
+<div class="container mt-5 ">
+    <div class="shadow-box p-4">
+        <!-- Hiển thị thông báo thành công -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="row">
+            <!-- Left: Avatar + Upload -->
+            <div class="col-md-4 text-center">
+                <img id="avatarPreview"
+                     src="@(string.IsNullOrEmpty(Model.ProfilePicturePath) ? "/uploads/profile/default-img.jpg" : Model.ProfilePicturePath)"
+                     class="rounded-circle img-thumbnail mb-3"
+                     style="width: 160px; height: 160px; object-fit: cover;" alt="Avatar" />
+
+                <form asp-action="UploadProfilePicture"
+                      asp-controller="Learner"
+                      method="post"
+                      enctype="multipart/form-data"
+                      class="mt-2">
+                    @Html.AntiForgeryToken()
+
+                    <input type="file"
+                           name="profilePicture"
+                           class="form-control mb-2"
+                           accept="image/*"
+                           onchange="previewProfileImage()" />
+
+                    @if (TempData["UploadError"] != null)
+                    {
+                        <div class="text-danger small">@TempData["UploadError"]</div>
+                    }
+
+                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-upload"></i> Tải ảnh mới
+                    </button>
+                </form>
+            </div>
+
+            <!-- Right: Edit Form -->
+            <div class="col-md-8">
+                <form asp-action="EditProfile"
+                      asp-controller="Learner"
+                      method="post"
+                      enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+
+                    <!-- Hidden ProfilePicturePath -->
+                    <input type="hidden" asp-for="ProfilePicturePath" />
+
+                    <div class="mb-3">
+                        <label asp-for="FullName" class="form-label">Họ và tên</label>
+                        <input asp-for="FullName" class="form-control" />
+                        <span asp-validation-for="FullName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Address" class="form-label">Địa chỉ</label>
+                        <input asp-for="Address" class="form-control" />
+                        <span asp-validation-for="Address" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PhoneNumber" class="form-label">Số điện thoại</label>
+                        <input asp-for="PhoneNumber" class="form-control" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="BirthDate" class="form-label">Ngày sinh</label>
+                        <input asp-for="BirthDate" type="date" class="form-control" />
+                        <span asp-validation-for="BirthDate" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Gender" class="form-label">Giới tính</label>
+                        <select asp-for="Gender" class="form-select">
+                            <option value="">-- Chọn --</option>
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                            <option value="Khác">Khác</option>
+                        </select>
+                        <span asp-validation-for="Gender" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">Mô tả</label>
+                        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="JobName" class="form-label">Nghề nghiệp</label>
+                        <input asp-for="JobName" class="form-control" />
+                        <span asp-validation-for="JobName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Liên kết mạng xã hội:</label>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text"><i class="bi bi-facebook text-primary"></i></span>
+                            <input asp-for="Facebook" placeholder="https://facebook.com/..." class="form-control" />
+                        </div>
+                        <span asp-validation-for="Facebook" class="text-danger small"></span>
+
+                        <div class="input-group mt-2">
+                            <span class="input-group-text"><i class="bi bi-youtube text-danger"></i></span>
+                            <input asp-for="YouTube" placeholder="https://youtube.com/..." class="form-control" />
+                        </div>
+                        <span asp-validation-for="YouTube" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a asp-action="Profile" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Quay lại hồ sơ
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-save"></i> Lưu chỉnh sửa
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script>
+        function previewProfileImage() {
+            const input = document.querySelector('input[name="profilePicture"]');
+            const preview = document.getElementById('avatarPreview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    preview.src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<style>
+    main.flex-grow-1{background-color:white}
+</style>

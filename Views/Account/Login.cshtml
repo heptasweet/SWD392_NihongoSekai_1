@@ -1,0 +1,572 @@
+﻿@using JapaneseLearningPlatform.Data.ViewModels
+@model LoginVM
+
+@{
+    ViewData["Title"] = "Đăng nhập";
+    Layout = "_Layout";
+    ViewData["HideNavbar"] = true;
+    ViewData["HideFooter"] = true;
+    ViewData["HideDailyWord"] = true;
+}
+
+@section Head {
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng nhập</title>
+    <meta name="description"
+          content="Đăng nhập vào tài khoản Nihongo Sekai của bạn và tiếp tục hành trình học tiếng Nhật với các khóa học chất lượng và lớp học trực tiếp." />
+}
+
+@section Styles {
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap" rel="stylesheet" />
+    <!-- Global Stylesheet -->
+    <link rel="stylesheet" href="/css/styles.css" />
+    <!-- Page-Specific CSS -->
+    <style>
+        /* Layout Containers */
+        .auth-page {
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-secondary-50) 100%);
+            display: flex;
+        }
+
+        .auth-main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-3xl) var(--spacing-lg);
+        }
+
+        .auth-card {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            max-width: 1000px;
+            width: 100%;
+            background: #fff;
+            border-radius: var(--radius-xl);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04);
+            overflow: hidden;
+        }
+
+        /* Form Column */
+        .auth-form-column {
+            padding: var(--spacing-3xl);
+        }
+
+        .auth-brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+            .auth-brand .brand-icon {
+                font-size: 2rem;
+                color: var(--color-primary-600);
+            }
+
+        .auth-title {
+            font-family: var(--font-heading);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
+            text-align: center;
+        }
+
+        .auth-subtitle {
+            color: var(--color-gray-600);
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: var(--spacing-lg);
+            text-align: center;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--color-gray-700);
+            margin-bottom: var(--spacing-sm);
+            font-size: 0.875rem;
+        }
+
+        .form-control {
+            padding: var(--spacing-lg);
+            border: 2px solid var(--color-gray-200);
+            border-radius: var(--radius-lg);
+        }
+
+            .form-control:focus {
+                border-color: var(--color-primary-600);
+                box-shadow: 0 0 0 3px rgba(220,38,38,0.1);
+            }
+
+        .auth-form-column .text-end {
+            text-align: center !important;
+        }
+
+        /* Password Input with Eye Toggle */
+        .password-input-wrapper {
+            position: relative;
+        }
+
+            .password-input-wrapper .form-control {
+                /* shrink input to accommodate toggle */
+                width: calc(100% - 3rem);
+                padding-right: 3rem;
+            }
+
+        /* Eye toggle button styling */
+        .password-toggle {
+            position: absolute;
+            /* adjust horizontal offset as needed (e.g., 5% from the right edge of the wrapper) */
+            right: 1%;
+            top: 60%;
+            transform: translateY(-50%);
+            background: white;
+            border: none;
+            color: var(--color-gray-400);
+            cursor: pointer;
+            padding: var(--spacing-xs);
+            border-radius: var(--radius-sm);
+            transition: color 0.3s ease;
+        }
+
+            .password-toggle:hover {
+                color: var(--color-gray-600);
+            }
+
+            .password-toggle svg {
+                width: 25px;
+                height: 25px;
+            }
+        /* Buttons & Links */
+        .btn-danger {
+            background-color: var(--color-primary-600);
+            border-color: var(--color-primary-600);
+        }
+
+        .btn-outline-danger {
+            color: var(--color-primary-600);
+            border-color: var(--color-primary-600);
+        }
+
+        .text-danger {
+            color: var(--color-primary-600) !important;
+        }
+
+        .text-decoration-none {
+            text-decoration: none !important;
+        }
+
+        /* Benefits Column */
+        .auth-benefits-column {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            /* gradient chính */
+            background: linear-gradient( 135deg, var(--color-primary-600), var(--color-secondary-600) );
+            color: #fff;
+            padding: var(--spacing-3xl);
+            /* bo góc bên phải của cả card */
+            border-top-right-radius: var(--radius-xl);
+            border-bottom-right-radius: var(--radius-xl);
+        }
+
+            /* chấm bi pattern */
+            .auth-benefits-column::before {
+                content: "";
+                position: absolute;
+                inset: 0; /* top:0; right:0; bottom:0; left:0; */
+                pointer-events: none; /* không chắn click */
+                background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M20 20c0 11.046-8.954 20-20 20v20h40V20H20z'/%3E%3C/g%3E%3C/svg%3E");
+                background-repeat: repeat;
+                background-position: center center;
+            }
+
+            /* đảm bảo nội dung luôn trên layer chấm bi */
+            .auth-benefits-column > * {
+                position: relative;
+                z-index: 1;
+            }
+
+
+        .benefits-list .benefit-item {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .benefit-icon {
+            width: 100px;
+            height: 50px;
+            background: rgba(255,255,255,0.2);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        /* ============ LOGIN PAGE OPTIMIZED ============ */
+        .auth-card {
+            max-height: none;
+            overflow: visible;
+        }
+
+        .auth-form-column,
+        .auth-benefits-column {
+            padding: var(--spacing-xl) var(--spacing-lg);
+        }
+
+        .auth-title {
+            font-size: 1.6rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .auth-subtitle {
+            font-size: 0.95rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .form-control {
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            border-radius: var(--radius-md);
+        }
+
+        .btn,
+        .btn-outline-danger {
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+        }
+
+        .mb-3 {
+            margin-bottom: var(--spacing-md);
+        }
+
+        @@media (max-width: 768px) {
+            .auth-card
+
+        {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .auth-form-column {
+            order: 1; /* Form hiển thị trước */
+        }
+
+        .auth-benefits-column {
+            order: 2; /* Benefit hiển thị sau */
+        }
+
+        }        
+
+        /* ===== Inline shake + highlight cho input lỗi ===== */
+        @@keyframes shake-input {
+            0%, 100%
+
+        {
+            transform: translateX(0);
+        }
+
+        25%, 75% {
+            transform: translateX(-5px);
+        }
+
+        50% {
+            transform: translateX(5px);
+        }
+
+        }
+
+        .input-error {
+            border-color: var(--color-primary-600);
+            animation: shake-input 0.3s ease;
+        }
+
+        /* Dark-mode overrides scoped under html.dark */
+        html.dark {
+            /* dark theme variable overrides */
+            --color-primary-50: #1e1e1e;
+            --color-secondary-50: #2a2a2a;
+            --color-primary-600: #bb86fc;
+            --color-secondary-600: #03dac6;
+            --color-gray-200: #3a3a3a;
+            --color-gray-600: #cfcfcf;
+            --color-gray-700: #e0e0e0;
+            --color-gray-400: #888888;
+            --color-gray-100: #121212;
+            --color-white: #ffffff;
+            --color-black: #000000;
+        }
+
+            html.dark body,
+            html.dark .auth-page {
+                background: var(--color-gray-100);
+                color: var(--color-white);
+            }
+
+            html.dark .auth-card {
+                background: var(--color-primary-50);
+                box-shadow: 0 10px 15px rgba(0, 0, 0, 0.5);
+            }
+
+            html.dark .form-control {
+                background: var(--color-gray-200);
+                color: var(--color-white);
+                border-color: var(--color-gray-400);
+            }
+
+                html.dark .form-control::placeholder {
+                    color: var(--color-gray-600);
+                }
+
+            html.dark .btn-danger {
+                background-color: var(--color-secondary-600);
+                border-color: var(--color-secondary-600);
+            }
+
+            html.dark .btn-outline-danger {
+                color: var(--color-secondary-600);
+                border-color: var(--color-secondary-600);
+            }
+
+            html.dark .text-danger {
+                color: var(--color-secondary-600) !important;
+            }
+
+            html.dark .auth-benefits-column {
+                background: linear-gradient( 135deg, var(--color-primary-600), var(--color-secondary-600) );
+            }
+
+            html.dark .benefit-icon {
+                background: rgba(255, 255, 255, 0.1);
+            }
+        }
+    </style>
+}
+
+<div class="auth-page">
+    <main class="auth-main">
+        <div class="auth-card">
+            <button id="darkModeToggle" class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0 m-3" aria-label="Chuyển chế độ sáng/tối">
+                🌙
+            </button>
+            <!-- Left: Sign-in Form -->
+            <div class="auth-form-column">
+                <div class="auth-brand">
+                    <span class="brand-icon">日</span>
+                    <span class="brand-nihongo">Nihongo</span>
+                    <span class="brand-sekai">Sekai</span>
+                </div>
+                <h1 class="auth-title">Chào mừng trở lại</h1>
+                <p class="auth-subtitle">Đăng nhập để tiếp tục hành trình học tiếng Nhật của bạn</p>
+
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success">@TempData["Success"]</div>
+                }
+
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger shake" role="alert">
+                        <strong>Xin lỗi!</strong> @TempData["Error"]
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger">
+                        @TempData["ErrorMessage"]
+                    </div>
+                }
+                <form asp-action="Login" method="post" id="loginForm">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="EmailAddress" class="form-label">Địa chỉ email</label>
+                        <input asp-for="EmailAddress" class="form-control" placeholder="Nhập địa chỉ email của bạn" autofocus />
+                        <span asp-validation-for="EmailAddress" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label">Mật khẩu</label>
+                        <input asp-for="Password"
+                               type="password"
+                               class="form-control"
+                               id="Password"
+                               placeholder="Nhập mật khẩu của bạn" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    <button id="loginButton"
+                            type="submit"
+                            class="btn btn-danger w-100 mb-3"
+                            data-loading-text="Đang đăng nhập...">
+                        <i class="bi bi-box-arrow-in-right me-1"></i>
+                        <span class="btn-text">Đăng nhập</span>
+                        <span class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+                    </button>
+
+                    <div class="text-center text-muted mb-3">hoặc đăng nhập bằng</div>
+
+                    <a asp-controller="Account" asp-action="ExternalLogin" asp-route-provider="Google"
+                       class="btn btn-outline-danger w-100 mb-3 d-flex justify-content-center align-items-center">
+                        <i class="bi bi-google me-2"></i> Tiếp tục với Google
+                    </a>
+
+                    <div class="text-end mb-2">
+                        <a asp-action="ForgotPassword" class="text-danger text-decoration-none">Quên mật khẩu?</a>
+                    </div>
+                    <div class="text-center small mb-4">
+                        Chưa có tài khoản? <a asp-action="Register" class="text-danger text-decoration-none">Đăng ký</a>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <a asp-controller="Home" asp-action="Index" class="text-muted small"><i class="bi bi-arrow-left-circle"></i> Quay về trang chủ</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right: Benefits Column -->
+            <div class="auth-benefits-column">
+                <h2>Chinh phục tiếng Nhật với sự tự tin</h2>
+                <p>Tham gia cùng hàng ngàn người học trên hành trình thành thạo tiếng Nhật với nền tảng toàn diện của chúng tôi</p>
+                <ul class="list-unstyled benefits-list">
+                    <li class="benefit-item">
+                        <div class="benefit-icon">📚</div>
+                        <div><h5>Khóa học do chuyên gia dẫn dắt</h5><p class="small">Học từ người bản xứ và giáo viên chứng nhận với các bài học có cấu trúc, tiến bộ</p></div>
+                    </li>
+                    <li class="benefit-item">
+                        <div class="benefit-icon">💬</div>
+                        <div><h5>Thực hành hội thoại trực tiếp</h5><p class="small">Tham gia lớp học tương tác và luyện nói với người thật trong thời gian thực</p></div>
+                    </li>
+                    <li class="benefit-item">
+                        <div class="benefit-icon">📊</div>
+                        <div><h5>Theo dõi tiến trình của bạn</h5><p class="small">Theo dõi hành trình học của bạn với phân tích chi tiết và đề xuất cá nhân hóa</p></div>
+                    </li>
+                    <li class="benefit-item">
+                        <div class="benefit-icon">🌍</div>
+                        <div><h5>Cộng đồng toàn cầu</h5><p class="small">Kết nối với người học khắp thế giới và hòa mình vào văn hóa Nhật Bản</p></div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</div>
+
+
+<!-- Scripts -->
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          const form       = document.getElementById("loginForm");
+          const btn        = document.getElementById("loginButton");
+          const emailInput = form.querySelector('input[name="EmailAddress"]');
+          const passInput  = form.querySelector('input[name="Password"]');
+
+          function resetLoginButton() {
+            btn.disabled = false;
+            btn.querySelector(".btn-text").textContent = "Đăng nhập";
+            btn.querySelector(".spinner-border").classList.add("d-none");
+          }
+
+          // Chỉ chuyển sang loading khi cả email + password đều không rỗng
+          form.addEventListener("submit", e => {
+            const email = emailInput.value.trim();
+            const pass  = passInput.value.trim();
+                  // nếu có lỗi thì highlight + shake
+        let hasError = false;
+        if (!email) {
+          hasError = true;
+          emailInput.classList.add("input-error");
+          setTimeout(() => emailInput.classList.remove("input-error"), 300);
+        }
+        if (!pass) {
+          hasError = true;
+          passInput.classList.add("input-error");
+          setTimeout(() => passInput.classList.remove("input-error"), 300);
+        }
+
+        if (hasError) {
+          // abort loading để HTML5 validation show lỗi
+          resetLoginButton();
+          return;
+        }
+            // show loading
+            btn.disabled = true;
+            btn.querySelector(".btn-text").textContent = btn.getAttribute("data-loading-text");
+            btn.querySelector(".spinner-border").classList.remove("d-none");
+          });
+
+          // Khi user bắt đầu sửa input, reset button về normal
+          [emailInput, passInput].forEach(input =>
+            input.addEventListener("input", resetLoginButton)
+          );
+
+          // —— Password eye‐toggle ——
+          const passwordToggle = document.getElementById("passwordToggle");
+          if (passwordToggle) {
+            const eyeOn  = passwordToggle.querySelector(".eye-icon");
+            const eyeOff = passwordToggle.querySelector(".eye-off-icon");
+            passwordToggle.addEventListener("click", () => {
+              if (passInput.type === "password") {
+                passInput.type = "text";
+                eyeOn.classList.add("d-none");
+                eyeOff.classList.remove("d-none");
+              } else {
+                passInput.type = "password";
+                eyeOn.classList.remove("d-none");
+                eyeOff.classList.add("d-none");
+              }
+            });
+          }
+        });
+    </script>
+
+    <script>
+        // Giữ nguyên animation cho benefit-item
+        const items = document.querySelectorAll('.benefit-item');
+        const io = new IntersectionObserver(entries => {
+          entries.forEach(e => {
+            if (e.isIntersecting) {
+              e.target.classList.add('visible');
+              io.unobserve(e.target);
+            }
+          });
+        }, { threshold: 0.2 });
+        items.forEach(i => io.observe(i));
+    </script>
+
+    <script>
+                document.addEventListener('DOMContentLoaded', () => {
+          const btn = document.getElementById('darkModeToggle');
+          const root = document.documentElement;
+
+          // khởi tạo trạng thái từ localStorage
+          if (localStorage.getItem('theme') === 'dark') {
+            root.classList.add('dark');
+            btn.textContent = '☀️';
+          }
+
+          btn.addEventListener('click', () => {
+            if (root.classList.toggle('dark')) {
+              btn.textContent = '☀️';
+              localStorage.setItem('theme', 'dark');
+            } else {
+              btn.textContent = '🌙';
+              localStorage.setItem('theme', 'light');
+            }
+          });
+        });
+
+    </script>
+}

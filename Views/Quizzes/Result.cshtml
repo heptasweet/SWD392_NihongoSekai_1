@@ -1,0 +1,93 @@
+﻿@model JapaneseLearningPlatform.Data.ViewModels.TakeQuizVM
+@using JapaneseLearningPlatform.Data.Enums
+
+@{
+    ViewData["Title"] = "Kết quả Quiz";
+    var correctAnswers = ViewBag.CorrectAnswers as int? ?? 0;
+    var totalQuestions = ViewBag.TotalQuestions as int? ?? 0;
+    var scorePercent = ViewBag.ScorePercent as int? ?? 0;
+}
+
+<div class="container mt-5 result-container">
+    <div class="card shadow-lg border-0 rounded-4 p-4 result-card">
+        <h2 class="fw-bold mb-4 text-center text-gradient">Kết quả của bạn</h2>
+        <h4 class="quiz-title text-center mb-4">@Model.QuizTitle</h4>
+
+        <div class="score-section mb-4 text-center">
+            <div class="score-circle d-inline-block">
+                <span class="score">@correctAnswers</span>
+                <span class="divider">/</span>
+                <span class="total">@totalQuestions</span>
+            </div>
+            <p class="mt-3 fs-5">Tỷ lệ đúng: <b>@scorePercent%</b></p>
+            @if (scorePercent < 80)
+            {
+            <div class="text-danger">
+                    <p>Bạn phải đạt tối thiểu 80% để vượt qua bài kiểm tra này.</p>
+            </div>    
+            }
+        </div>
+
+        @for (int i = 0; i < Model.Questions.Count; i++)
+        {
+            var question = Model.Questions[i];
+            var selectedSingle = question.SelectedOptionId;
+            var selectedMultiple = question.SelectedOptionIds ?? new List<int>();
+
+            <div class="question-card p-3 mb-4 rounded shadow-sm">
+                <h5 class="fw-bold mb-3">Câu @(i + 1): @question.QuestionText</h5>
+
+                @foreach (var option in question.Options)
+                {
+                    bool isSelected = question.QuestionType == QuestionType.SingleChoice
+                    ? option.OptionId == selectedSingle
+                    : selectedMultiple.Contains(option.OptionId);
+
+                    bool isCorrect = option.IsCorrect;
+
+                    string bgClass = "";
+                    string icon = "";
+
+                    if (isSelected && isCorrect)
+                    {
+                        bgClass = "bg-success text-white";
+                        icon = "bi bi-check-circle-fill";
+                    }
+                    else if (isSelected && !isCorrect)
+                    {
+                        bgClass = "bg-danger text-white";
+                        icon = "bi bi-x-circle-fill";
+                    }
+                    else if (!isSelected && isCorrect)
+                    {
+                        bgClass = "bg-success bg-opacity-25";
+                        icon = "bi bi-check-circle";
+                    }
+
+                    <div class="p-2 rounded mb-2 @bgClass d-flex justify-content-between align-items-center option-item">
+                        <span>@option.OptionText</span>
+                        @if (!string.IsNullOrEmpty(icon))
+                        {
+                            <i class="@icon fs-5"></i>
+                        }
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(question.AIExplanation))
+                {
+                    <div class="alert alert-warning mt-3 ai-explanation">
+                        <i class="bi bi-robot me-2"></i>
+                        <strong>AI Giải thích:</strong> @Html.Raw(question.AIExplanation)
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="text-center mt-4">
+            <a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.CourseId"
+               class="btn btn-lg btn-gradient px-4 py-2">
+                <i class="bi bi-arrow-left-circle me-2"></i> Về trang Khóa học
+            </a>
+        </div>
+    </div>
+</div>
