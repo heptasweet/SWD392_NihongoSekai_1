@@ -1,0 +1,45 @@
+﻿@using JapaneseLearningPlatform.Data.ViewModels
+@model ClassroomTemplateVM
+
+@{
+    ViewData["Title"] = "Xóa mẫu";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-danger shadow">
+                <div class="card-body">
+                    <h3 class="text-danger mb-4 text-center">
+                        <i class="bi bi-trash3-fill me-2"></i>Xác nhận xóa
+                    </h3>
+
+                    <dl class="row">
+                        <dt class="col-sm-4 fw-semibold">Tên lớp:</dt>
+                        <dd class="col-sm-8">@Model.Title</dd>
+
+                        <dt class="col-sm-4 fw-semibold">Mô tả:</dt>
+                        <dd class="col-sm-8">@Model.Description</dd>
+
+                        <dt class="col-sm-4 fw-semibold">Trình độ:</dt>
+                        <dd class="col-sm-8">@Model.LanguageLevel</dd>
+                    </dl>
+                    <div class="alert alert-warning mt-4">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Những phiên lớp học hiện đang sử dụng mẫu này cũng sẽ bị xoá. Không thể hoàn tác hành động này.
+                    </div>
+
+                    <form asp-action="Delete" method="post" class="mt-4 d-flex justify-content-between">
+                        <input type="hidden" asp-for="Id" />
+                        <a href="javascript:history.back()" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Hủy
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash-fill"></i> Xóa
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

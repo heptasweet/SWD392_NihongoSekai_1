@@ -1,0 +1,82 @@
+﻿@model JapaneseLearningPlatform.Data.ViewModels.ClassroomTemplateVM
+@using JapaneseLearningPlatform.Data.Enums
+
+@{
+    ViewData["Title"] = "Tạo mẫu mới";
+}
+
+<div class="container mt-4">
+    <h2 class="fw-bold mb-4 text-center">Tạo mẫu mới</h2>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label"></label>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label"></label>
+                    <textarea asp-for="Description" class="form-control"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ImageFile" class="form-label">Ảnh thu nhỏ</label>
+                    <input asp-for="ImageFile" type="file" class="form-control" />
+                    <span asp-validation-for="ImageFile" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DocumentFile" class="form-label">Chương Trình Học</label>
+                    <input asp-for="DocumentFile" type="file" class="form-control" />
+                    <span asp-validation-for="DocumentFile" class="text-danger"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="LanguageLevel" class="form-label"></label>
+                    <select asp-for="LanguageLevel" asp-items="Html.GetEnumSelectList<LanguageLevel>()" class="form-control"></select>
+                    <span asp-validation-for="LanguageLevel" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i> Tạo
+                    </button>
+                    <a href="javascript:history.back()" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Trở về
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.querySelector('form').addEventListener('submit', function (e) {
+            const allowedExtensions = [".gif", ".pdf", ".doc", ".docx", ".xls", ".xlsx"];
+            const imageFile = document.querySelector('input[name="ImageFile"]').files[0];
+            const docFile = document.querySelector('input[name="DocumentFile"]').files[0];
+            let valid = true;
+
+            function checkFile(file, fieldName) {
+                if (file) {
+                    const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+                    if (!allowedExtensions.includes(ext)) {
+                        alert(`File "${file.name}" không đúng định dạng. Chỉ chấp nhận ảnh, PDF, Word, Excel.`);
+                        valid = false;
+                    }
+                }
+            }
+
+            checkFile(imageFile, 'ImageFile');
+            checkFile(docFile, 'DocumentFile');
+            if (!valid) e.preventDefault();
+        });
+    </script>
+}
+
