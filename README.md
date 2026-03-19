@@ -69,9 +69,10 @@ dotnet run
 
 ## 👥 **Tác giả & Người đóng góp**
 
-Minh Phú
 Minh Khôi
+
 Gia Khôi
+
 Văn Hoàng
 
 ---
