@@ -9,8 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;               // Include()
-using JapaneseLearningPlatform.Data;
-using Microsoft.AspNetCore.Mvc;
 namespace JapaneseLearningPlatform.Data.Services
 {
     public class CertificateService : ICertificateService

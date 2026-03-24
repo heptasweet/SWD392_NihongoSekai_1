@@ -183,7 +183,7 @@
                     <option value="">Tất cả</option>
                     @foreach (var r in roles)
                     {
-                        <option value="@r" @@(r= =currentRole ? "selected" : "" )>@r</option>
+                        <option value="@r" selected="@(r == currentRole ? "selected" : null)">@r</option>
                     }
                 </select>
             </div>
@@ -193,8 +193,8 @@
                 <label for="statusFilter" class="form-label">Trạng Thái</label>
                 <select id="statusFilter" class="form-select">
                     <option value="">Tất cả</option>
-                    <option value="Đã Giải Quyết" @@(currentStat= ="Đã Giải Quyết" ?"selected":"")>Đã Giải Quyết</option>
-                    <option value="Đang Chờ" @@(currentStat= ="Đang Chờ" ?"selected":"")>Đang Chờ</option>
+                    <option value="Đã Giải Quyết" selected="@(currentStat == "Đã Giải Quyết" ? "selected" : null)">Đã Giải Quyết</option>
+                    <option value="Đang Chờ" selected="@(currentStat == "Đang Chờ" ? "selected" : null)">Đang Chờ</option>
                 </select>
             </div>
 
@@ -203,9 +203,9 @@
                 <label for="dateFilter" class="form-label">Thời gian</label>
                 <select id="dateFilter" class="form-select">
                     <option value="">Tất cả</option>
-                    <option value="today" @@(ViewBag.CurrentDateFilter= ="today" ?"selected":"")>Hôm nay</option>
-                    <option value="3days" @@(ViewBag.CurrentDateFilter= ="3days" ?"selected":"")>3 ngày trước</option>
-                    <option value="7days" @@(ViewBag.CurrentDateFilter= ="7days" ?"selected":"")>7 ngày trước</option>
+                    <option value="today" selected="@(ViewBag.CurrentDateFilter == "today" ? "selected" : null)">Hôm nay</option>
+                    <option value="3days" selected="@(ViewBag.CurrentDateFilter == "3days" ? "selected" : null)">3 ngày trước</option>
+                    <option value="7days" selected="@(ViewBag.CurrentDateFilter == "7days" ? "selected" : null)">7 ngày trước</option>
                 </select>
             </div>
 
