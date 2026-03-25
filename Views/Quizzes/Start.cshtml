@@ -45,6 +45,7 @@
                 <h2 class="fw-bold mb-4">@Model.QuizTitle</h2>
                 <form id="quizForm" asp-action="Submit" method="post">
                     <input type="hidden" asp-for="QuizId" />
+                    <input type="hidden" id="QuestionsJson" name="QuestionsJson" />
 
                     @for (int i = 0; i < Model.Questions.Count; i++)
                     {
@@ -55,6 +56,7 @@
                             @* ← GHI NHỚ: phải có 2 hidden này để bind QuestionId/Text *@
                             <input type="hidden" asp-for="Questions[@i].QuestionId" />
                             <input type="hidden" asp-for="Questions[@i].QuestionText" />
+                            <input type="hidden" asp-for="Questions[@i].QuestionType" />
 
                             <div class="options-list">
                                 @if (q.QuestionType == QuestionType.SingleChoice)
@@ -255,7 +257,51 @@
                     answeredSet.add(idx);
                     updateUI();
                 }));
-            btnSubmit.addEventListener('click', () => quizForm.submit());
+
+            // Before submitting, build a single JSON payload of selections to avoid model-binding issues
+            quizForm.addEventListener('submit', (e) => {
+                const containers = Array.from(document.querySelectorAll('.question-container'));
+                const payload = [];
+
+                containers.forEach((container, idx) => {
+                    const qIndex = idx;
+                    const radios = Array.from(container.querySelectorAll('input[type="radio"]'));
+                    const checkboxes = Array.from(container.querySelectorAll('input[type="checkbox"]'));
+
+                    const questionIdInput = container.querySelector('input[name="Questions[' + idx + '].QuestionId"]');
+                    const questionId = questionIdInput ? parseInt(questionIdInput.value, 10) : null;
+
+                    if (radios.length) {
+                        const checked = radios.find(r => r.checked);
+                        const selected = checked ? [parseInt(checked.value, 10)] : [];
+                        payload.push({ questionId: questionId, selected: selected });
+                    } else if (checkboxes.length) {
+                        const checked = checkboxes.filter(c => c.checked).map(c => parseInt(c.value, 10));
+                        payload.push({ questionId: questionId, selected: checked });
+                    }
+                });
+
+                // put JSON into hidden field
+                const hidden = document.getElementById('QuestionsJson');
+                if (hidden) hidden.value = JSON.stringify(payload);
+
+                // no client debug logging
+            });
+
+            btnSubmit.addEventListener('click', () => {
+                // Use requestSubmit so the 'submit' event handler fires and fills QuestionsJson.
+                if (typeof quizForm.requestSubmit === 'function') {
+                    quizForm.requestSubmit();
+                } else {
+                    // fallback: create temporary submit button which triggers submit handlers
+                    const tmp = document.createElement('button');
+                    tmp.type = 'submit';
+                    tmp.style.display = 'none';
+                    quizForm.appendChild(tmp);
+                    tmp.click();
+                    tmp.remove();
+                }
+            });
             gotoQuestion(0);
         });
     </script>

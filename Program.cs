@@ -149,6 +149,18 @@ namespace JapaneseLearningPlatform
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+            // TEMP: log each incoming request with user info to help track unexpected polling
+            if (app.Environment.IsDevelopment())
+            {
+                app.Use(async (context, next) =>
+                {
+                    var loggerFactory = context.RequestServices.GetRequiredService<ILoggerFactory>();
+                    var logger = loggerFactory.CreateLogger("RequestTrace");
+                    var user = context.User?.Identity?.IsAuthenticated == true ? context.User.Identity.Name : "(anon)";
+                    logger.LogInformation("[RequestTrace] {Method} {Path} User={User}", context.Request.Method, context.Request.Path + context.Request.QueryString, user);
+                    await next();
+                });
+            }
             app.UseRouting();
             app.UseSession();
             app.UseAuthentication();

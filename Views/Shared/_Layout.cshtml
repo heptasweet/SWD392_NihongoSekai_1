@@ -292,45 +292,7 @@
                 iframe.style.borderRadius = "50%";
             }
         }, false);
-        // Sinh URL chính xác dựa vào route MVC
-        const badgeApiUrl = '@Url.Action("GetUnresolvedCounts", "Reports")';
-
-        async function refreshReportBadges() {
-          try {
-            const res = await fetch(badgeApiUrl);
-            if (!res.ok) return;
-            const { total, bySubj } = await res.json();
-
-            // Badge tổng
-            const navBadge = document.getElementById('nav-report-badge');
-            if (total > 0) {
-              navBadge.style.display = 'inline-block';
-              navBadge.innerText     = total < 100 ? total : '99+';
-            } else {
-              navBadge.style.display = 'none';
-            }    
-            
-            // Badge chủ đề
-            document.querySelectorAll('.subject-badge').forEach(el => {
-              const subj = el.dataset.subject;
-              const entry = bySubj.find(x => x.Subject === subj);
-              const cnt   = entry ? entry.Count : 0;
-              if (cnt > 0) {
-                el.style.display = 'inline-block';
-                el.innerText     = cnt < 100 ? cnt : '99+';
-              } else {
-                el.style.display = 'none';
-              }
-            });
-          } catch (e) {
-            console.error(e);
-        }        
-    }   
-
-        document.addEventListener('DOMContentLoaded', () => {
-          refreshReportBadges();
-          setInterval(refreshReportBadges, 1000);
-        });
+        // removed duplicate rapid badge refresher
     </script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -375,8 +337,14 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-          refreshReportBadges();
-          setInterval(refreshReportBadges, 60000); // cập nhật mỗi phút
+          // Only refresh badges for Admin users to avoid frequent DB polling for all visitors
+          @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+          {
+            <text>
+              refreshReportBadges();
+              setInterval(refreshReportBadges, 60000); // cập nhật mỗi phút
+            </text>
+          }
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)

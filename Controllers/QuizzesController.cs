@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Linq;
+using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace JapaneseLearningPlatform.Controllers
 {
@@ -16,11 +19,15 @@ namespace JapaneseLearningPlatform.Controllers
         private readonly AppDbContext _context;
         private readonly IQuizQuestionsService _questionsService;
         private readonly IAIExplanationService _aiService;
-        public QuizzesController(AppDbContext context, IQuizQuestionsService questionsService, IAIExplanationService aiService)
+        private readonly ILogger<QuizzesController> _logger;
+        // DTO for parsing QuestionsJson payload from the Start view
+        private record SelectionDto(int questionId, List<int> selected);
+        public QuizzesController(AppDbContext context, IQuizQuestionsService questionsService, IAIExplanationService aiService, ILogger<QuizzesController> logger)
         {
             _context = context;
             _questionsService = questionsService;
             _aiService = aiService;
+            _logger = logger;
         }
 
          public async Task<IActionResult> Details(int id)
@@ -74,6 +81,77 @@ namespace JapaneseLearningPlatform.Controllers
         public async Task<IActionResult> Submit(TakeQuizVM model)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // If the view emitted a JSON payload of selections (QuestionsJson), prefer that mapping
+            var qjson = Request.Form["QuestionsJson"].FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(qjson))
+            {
+                try
+                {
+                    var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    var selections = JsonSerializer.Deserialize<List<SelectionDto>>(qjson, opts);
+                    if (selections != null)
+                    {
+                        foreach (var sel in selections)
+                        {
+                            // find matching question in model by QuestionId
+                            var mq = model.Questions.FirstOrDefault(x => x.QuestionId == sel.questionId);
+                            if (mq == null) continue;
+
+                            if (mq.QuestionType == QuestionType.SingleChoice)
+                            {
+                                mq.SelectedOptionId = sel.selected?.FirstOrDefault();
+                            }
+                            else if (mq.QuestionType == QuestionType.MultipleChoice)
+                            {
+                                mq.SelectedOptionIds = sel.selected ?? new List<int>();
+                            }
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    // ignore parse errors and fall back to legacy form parsing
+                }
+            }
+
+            // Ensure selections are populated from the form (robust against model-binding issues)
+            for (var qi = 0; qi < model.Questions.Count; qi++)
+            {
+                var q = model.Questions[qi];
+                if (q == null) continue;
+
+                if (q.QuestionType == QuestionType.SingleChoice)
+                {
+                    // don't overwrite if already set by QuestionsJson
+                    if (q.SelectedOptionId == null)
+                    {
+                        var val = Request.Form[$"Questions[{qi}].SelectedOptionId"].FirstOrDefault();
+                        if (int.TryParse(val, out var id)) q.SelectedOptionId = id;
+                    }
+                }
+                else if (q.QuestionType == QuestionType.MultipleChoice)
+                {
+                    // don't overwrite if already set by QuestionsJson
+                    if (q.SelectedOptionIds == null || !q.SelectedOptionIds.Any())
+                    {
+                        var values = Request.Form[$"Questions[{qi}].SelectedOptionIds"];
+                        var selected = new List<int>();
+                        foreach (var v in values)
+                        {
+                            if (string.IsNullOrWhiteSpace(v)) continue;
+                            // handle both multiple form entries and comma-separated lists
+                            var parts = v.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+                            foreach (var p in parts)
+                            {
+                                if (int.TryParse(p.Trim(), out var id)) selected.Add(id);
+                            }
+                        }
+                        q.SelectedOptionIds = selected;
+                    }
+                }
+            }
+
+            // (debug logging removed)
 
             int totalQuestions = model.Questions.Count;
             int correctAnswers = 0;
@@ -94,8 +172,11 @@ namespace JapaneseLearningPlatform.Controllers
                 Details = new List<QuizResultDetail>()
             };
 
-            foreach (var question in model.Questions)
+            var aiRequests = new List<AIExplanationRequest>();
+
+            for (var qi = 0; qi < model.Questions.Count; qi++)
             {
+                var question = model.Questions[qi];
                 bool isCorrect = false;
 
                 // Lấy câu hỏi từ DB để có danh sách option chính xác
@@ -108,6 +189,13 @@ namespace JapaneseLearningPlatform.Controllers
 
                 if (question.QuestionType == QuestionType.SingleChoice)
                 {
+                    // fallback: try read from form if model binding didn't bind radio value
+                    if (question.SelectedOptionId == null)
+                    {
+                        var frmVal = Request.Form[$"Questions[{qi}].SelectedOptionId"].FirstOrDefault();
+                        if (int.TryParse(frmVal, out var val)) question.SelectedOptionId = val;
+                    }
+
                     if (question.SelectedOptionId != null)
                     {
                         var selectedOption = dbQuestion.Options.FirstOrDefault(o => o.Id == question.SelectedOptionId);
@@ -124,8 +212,31 @@ namespace JapaneseLearningPlatform.Controllers
                 }
                 else if (question.QuestionType == QuestionType.MultipleChoice)
                 {
-                    var selectedIds = question.SelectedOptionIds ?? new List<int>();
-                    var correctOptionIds = correctOptions.Select(o => o.Id).ToList();
+                    // try to use model bound list; if empty, fallback to reading Request.Form values
+                    var selectedIds = (question.SelectedOptionIds != null && question.SelectedOptionIds.Any())
+                        ? question.SelectedOptionIds
+                        : new List<int>();
+
+                    if (!selectedIds.Any())
+                    {
+                        var values = Request.Form[$"Questions[{qi}].SelectedOptionIds"];
+                        foreach (var v in values)
+                        {
+                            if (string.IsNullOrWhiteSpace(v)) continue;
+                            var parts = v.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+                            foreach (var p in parts)
+                            {
+                                if (int.TryParse(p.Trim(), out var id)) selectedIds.Add(id);
+                            }
+                        }
+                        question.SelectedOptionIds = selectedIds;
+                    }
+
+                    // normalize selections and correct ids (dedupe) before comparison
+                    selectedIds = selectedIds.Distinct().ToList();
+                    var correctOptionIds = correctOptions.Select(o => o.Id).Distinct().ToList();
+
+                    // (debug logs removed)
 
                     isCorrect = selectedIds.Count == correctOptionIds.Count &&
                                 !selectedIds.Except(correctOptionIds).Any();
@@ -140,37 +251,61 @@ namespace JapaneseLearningPlatform.Controllers
                     });
                 }
 
-                // Gọi AI để giải thích nếu trả lời sai
+                // If answer is wrong, queue request for batch AI explanation
                 if (!isCorrect)
                 {
                     var userAnswerText = string.Join(", ", question.Options
                         .Where(o => question.SelectedOptionIds?.Contains(o.OptionId) == true || o.OptionId == question.SelectedOptionId)
                         .Select(o => o.OptionText));
 
-                    try
+                    aiRequests.Add(new AIExplanationRequest
                     {
-                        question.AIExplanation = await _aiService.GetExplanationAsync(
-                            question.QuestionText,
-                            userAnswerText,
-                            correctAnswerText
-                        );
-                    }
-                    catch (Exception ex)
-                    {
-                        question.AIExplanation = $"[AI Error]: {ex.Message}";
-                    }
+                        QuestionId = question.QuestionId,
+                        QuestionText = question.QuestionText,
+                        UserAnswer = userAnswerText,
+                        CorrectAnswer = correctAnswerText
+                    });
                 }
 
                 // Gán lại IsCorrect cho UI
-                foreach (var opt in question.Options)
-                {
-                    opt.IsCorrect = correctOptions.Any(co => co.Id == opt.OptionId);
-                }
+                    foreach (var opt in question.Options)
+                    {
+                        opt.IsCorrect = correctOptions.Any(co => co.Id == opt.OptionId);
+                        // mark selected for UI
+                        if (question.QuestionType == QuestionType.SingleChoice)
+                            opt.IsSelected = opt.OptionId == question.SelectedOptionId;
+                        else
+                            opt.IsSelected = question.SelectedOptionIds?.Contains(opt.OptionId) == true;
+                    }
             }
 
             result.Score = correctAnswers;
             _context.QuizResults.Add(result);
             await _context.SaveChangesAsync();
+
+            // Call AI once for all wrong questions to reduce API calls and latency
+            if (aiRequests.Any())
+            {
+                Dictionary<int, string> aiResponses;
+                try
+                {
+                    aiResponses = await _aiService.GetExplanationsAsync(aiRequests);
+                }
+                catch (Exception ex)
+                {
+                    // Fill errors for each request
+                    aiResponses = aiRequests.ToDictionary(r => r.QuestionId, r => $"[AI Error]: {ex.Message}");
+                }
+
+                // Map explanations back to the model questions
+                foreach (var q in model.Questions)
+                {
+                    if (aiResponses.TryGetValue(q.QuestionId, out var expl))
+                    {
+                        q.AIExplanation = expl;
+                    }
+                }
+            }
 
             model.CourseId = quiz.CourseId; // add courseId to model for result view
 

@@ -8,6 +8,8 @@
     var scorePercent = ViewBag.ScorePercent as int? ?? 0;
 }
 
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
+
 <div class="container mt-5 result-container">
     <div class="card shadow-lg border-0 rounded-4 p-4 result-card">
         <h2 class="fw-bold mb-4 text-center text-gradient">Kết quả của bạn</h2>
@@ -31,18 +33,14 @@
         @for (int i = 0; i < Model.Questions.Count; i++)
         {
             var question = Model.Questions[i];
-            var selectedSingle = question.SelectedOptionId;
-            var selectedMultiple = question.SelectedOptionIds ?? new List<int>();
+            // use option.IsSelected which controller sets after parsing form
 
             <div class="question-card p-3 mb-4 rounded shadow-sm">
                 <h5 class="fw-bold mb-3">Câu @(i + 1): @question.QuestionText</h5>
 
                 @foreach (var option in question.Options)
                 {
-                    bool isSelected = question.QuestionType == QuestionType.SingleChoice
-                    ? option.OptionId == selectedSingle
-                    : selectedMultiple.Contains(option.OptionId);
-
+                    bool isSelected = option.IsSelected;
                     bool isCorrect = option.IsCorrect;
 
                     string bgClass = "";
@@ -91,3 +89,4 @@
         </div>
     </div>
 </div>
+
