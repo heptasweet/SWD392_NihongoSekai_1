@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Polly;
 using Polly.Extensions.Http;
@@ -132,6 +133,7 @@ namespace JapaneseLearningPlatform
 
             ///////////////////////////////////////////
             builder.Services.AddSignalR();
+            builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
             ///////////////////////////////////////////
 
             var app = builder.Build();
@@ -173,6 +175,7 @@ namespace JapaneseLearningPlatform
             ///////////////////////////////////////////
             //Chat mesage hub
             app.MapHub<ClassroomChatHub>("/classroomChatHub");
+            app.MapHub<PrivateChatHub>("/privateChatHub");
             ///////////////////////////////////////////
 
             // Seed database

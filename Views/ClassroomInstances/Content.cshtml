@@ -7,9 +7,9 @@
 
 <div class="container mt-4">
     <a asp-action="Details"
-       asp-controller="ClassroomInstances"
-       asp-route-id="@Model.Instance.Id"
-       class="btn-back-simple">
+           asp-controller="ClassroomInstances"
+           asp-route-id="@Model.Instance.Id"
+           class="btn-back-simple">
         <i class="bi bi-arrow-left"></i> Trở về
     </a>
     <!-- 🔹 Header -->
@@ -25,7 +25,7 @@
     <ul class="nav nav-tabs mb-3" id="classTabs" role="tablist" style="border-bottom: 1px solid #ddd;">
         <li class="nav-item" role="presentation">
             <a class="nav-link active" id="overview-tab" data-bs-toggle="tab" href="#overview" role="tab"
-               style="padding: 4px 10px; font-size: 14px; border: none; background: none;">
+                   style="padding: 4px 10px; font-size: 14px; border: none; background: none;">
                 Tổng quan
             </a>
         </li>
@@ -33,40 +33,53 @@
             @if (User.IsInRole("Partner") || User.IsInRole("Admin"))
             {
                 <a class="nav-link" id="learners-tab" data-bs-toggle="tab" href="#learners" role="tab"
-                   style="padding: 4px 10px; font-size: 14px; border: none; background: none;">
+                       style="padding: 4px 10px; font-size: 14px; border: none; background: none;">
                     Danh sách học viên
+                </a>
+            }
+            else if (User.IsInRole("Learner"))
+            {
+                <a class="nav-link" id="learners-tab" data-bs-toggle="tab" href="#learners" role="tab"
+                       style="padding: 4px 10px; font-size: 14px; border: none; background: none;">
+                    Thành viên lớp
                 </a>
             }
         </li>
         <li class="nav-item" role="presentation">
             <a class="nav-link" id="resources-tab" data-bs-toggle="tab" href="#resources" role="tab"
-               style="padding: 4px 10px; font-size: 14px; border: none; background: none;">
+                   style="padding: 4px 10px; font-size: 14px; border: none; background: none;">
                 Tài nguyên
             </a>
         </li>
         <li class="nav-item" role="presentation">
             <a class="nav-link" id="assignment-tab" data-bs-toggle="tab" href="#assignment" role="tab"
-               style="padding: 4px 10px; font-size: 14px; border: none; background: none;">
+                   style="padding: 4px 10px; font-size: 14px; border: none; background: none;">
                 Đánh giá cuối kỳ
             </a>
         </li>
         <li class="nav-item" role="presentation">
             <a class="nav-link" id="review-tab" data-bs-toggle="tab" href="#review" role="tab"
-               style="padding: 4px 10px; font-size: 14px; border: none; background: none;">
+                   style="padding: 4px 10px; font-size: 14px; border: none; background: none;">
                 Feedback
             </a>
         </li>
         <li class="nav-item" role="presentation">
             <a class="nav-link" id="chat-tab" data-bs-toggle="tab" href="#chat" role="tab"
-               style="padding: 4px 10px; font-size: 14px; border: none; background: none;">
+                   style="padding: 4px 10px; font-size: 14px; border: none; background: none;">
                 Chat
             </a>
         </li>
         <li class="nav-item" role="presentation">
+            <a class="nav-link" id="private-chat-tab" data-bs-toggle="tab" href="#private-chat" role="tab"
+                   style="padding: 4px 10px; font-size: 14px; border: none; background: none;">
+                Chat Riêng
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
             <a asp-controller="VideoCall" asp-action="Index"
-               role="tab"
-               style="padding: 4px 10px; font-size: 14px; border: none; background: none;"
-               class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "VideoCall" ? "active-tab" : "")">
+                   role="tab"
+                   style="padding: 4px 10px; font-size: 14px; border: none; background: none;"
+                   class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "VideoCall" ? "active-tab" : "")">
                 Video call
             </a>
         </li>
@@ -109,7 +122,7 @@
                                     <th style="text-align:center; vertical-align:middle; padding:6px; border: 1px solid #dee2e6;">Tên</th>
                                     <th style="text-align:center; vertical-align:middle; padding:6px; border: 1px solid #dee2e6;">Email</th>
                                     <th style="text-align:center; vertical-align:middle; padding:6px; border: 1px solid #dee2e6;">Thời điểm tham gia</th>
-                                    <th style="width:15%; text-align:center; vertical-align:middle; padding:6px; border: 1px solid #dee2e6;">Thông Tin Học Viên</th>
+                                    <th style="width:20%; text-align:center; vertical-align:middle; padding:6px; border: 1px solid #dee2e6;">Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -126,12 +139,17 @@
                                             </td>
                                             <td style="text-align:center; vertical-align:middle; padding:6px; border: 1px solid #dee2e6;">
                                                 <a asp-controller="Account"
-                                                   asp-action="ViewProfile"
-                                                   asp-route-learnerId="@enrollment.Learner?.Id"
-                                                   asp-route-classroomId="@Model.Instance.Id"
-                                                   class="btn btn-info btn-sm">
+                                                       asp-action="ViewProfile"
+                                                       asp-route-learnerId="@enrollment.Learner?.Id"
+                                                       asp-route-classroomId="@Model.Instance.Id"
+                                                       class="btn btn-info btn-sm">
                                                     Xem Hồ Sơ
                                                 </a>
+                                                <button class="btn btn-outline-secondary btn-sm start-private-chat"
+                                                        data-user-id="@enrollment.Learner?.Id"
+                                                        data-user-name="@enrollment.Learner?.FullName">
+                                                    Chat
+                                                </button>
                                             </td>
                                         </tr>
                                         index++;
@@ -143,6 +161,114 @@
                 </div>
             </div>
         }
+
+        else if (User.IsInRole("Learner"))
+        {
+            <div class="tab-pane fade" id="learners" role="tabpanel">
+                <div class="p-3">
+                    <h5 class="fw-bold mb-3">Danh sách thành viên</h5>
+                    <table class="table mt-3" style="border-collapse: collapse; border: 1px solid #dee2e6; width: 100%;">
+                        <thead style="background-color: #f8f9fa; border: 1px solid #dee2e6;">
+                            <tr>
+                                <th style="width:5%; text-align:center; vertical-align:middle; padding:6px; border: 1px solid #dee2e6;">#</th>
+                                <th style="text-align:center; vertical-align:middle; padding:6px; border: 1px solid #dee2e6;">Tên</th>
+                                <th style="text-align:center; vertical-align:middle; padding:6px; border: 1px solid #dee2e6;">Email</th>
+                                <th style="width:20%; text-align:center; vertical-align:middle; padding:6px; border: 1px solid #dee2e6;">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Partner -->
+                            <tr style="border: 1px solid #dee2e6; background-color: #f8f9fa;">
+                                <td style="text-align:center; vertical-align:middle; padding:6px; border: 1px solid #dee2e6;">1</td>
+                                <td style="vertical-align:middle; padding:6px; border: 1px solid #dee2e6;">@Model.Template.Partner.FullName (Partner)</td>
+                                <td style="vertical-align:middle; padding:6px; border: 1px solid #dee2e6;">@Model.Template.Partner.Email</td>
+                                <td style="text-align:center; vertical-align:middle; padding:6px; border: 1px solid #dee2e6;">
+                                    <a asp-controller="Account"
+                                           asp-action="ViewProfile"
+                                           asp-route-learnerId="@Model.Template.Partner.Id"
+                                           class="btn btn-info btn-sm">
+                                        Xem Hồ Sơ
+                                    </a>
+                                    <button class="btn btn-outline-secondary btn-sm start-private-chat"
+                                            data-user-id="@Model.Template.Partner.Id"
+                                            data-user-name="@Model.Template.Partner.FullName">
+                                        Chat
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- Học viên khác -->
+                            @{
+                                int index = 2;
+                                foreach (var e in Model.Instance.Enrollments.Where(en => en.LearnerId != ViewBag.CurrentUserId))
+                                {
+                                    <tr style="border: 1px solid #dee2e6;">
+                                        <td style="text-align:center; vertical-align:middle; padding:6px; border: 1px solid #dee2e6;">@index</td>
+                                        <td style="vertical-align:middle; padding:6px; border: 1px solid #dee2e6;">@e.Learner?.FullName</td>
+                                        <td style="vertical-align:middle; padding:6px; border: 1px solid #dee2e6;">@e.Learner?.Email</td>
+                                        <td style="text-align:center; vertical-align:middle; padding:6px; border: 1px solid #dee2e6;">
+                                            <a asp-controller="Account"
+                                                   asp-action="ViewProfile"
+                                                   asp-route-learnerId="@e.Learner?.Id"
+                                                   class="btn btn-info btn-sm">
+                                                Xem Hồ Sơ
+                                            </a>
+                                            <button class="btn btn-outline-secondary btn-sm start-private-chat"
+                                                    data-user-id="@e.Learner?.Id"
+                                                    data-user-name="@e.Learner?.FullName">
+                                                Chat
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    index++;
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        <!-- Chat Riêng -->
+        <div class="tab-pane fade" id="private-chat" role="tabpanel">
+            <div class="private-chat-wrapper">
+                <!-- Danh sách user -->
+                <div class="private-chat-users">
+                    <ul id="privateChatUserList">
+                        <li class="chat-user active start-private-chat"
+                            data-user-id="@Model.Template.Partner.Id"
+                            data-user-name="@Model.Template.Partner.FullName">
+                            <img src="@(string.IsNullOrEmpty(Model.Template.Partner.ProfilePicturePath)
+                                                                                                                                ? "/uploads/profile/default-img.jpg"
+                                                                                                                                : Model.Template.Partner.ProfilePicturePath)"
+                                 title="@Model.Template.Partner.FullName (Partner)" />
+                            <span>@Model.Template.Partner.FullName (Partner)</span>
+                        </li>
+                        @foreach (var e in Model.Instance.Enrollments.Where(en => en.LearnerId != ViewBag.CurrentUserId))
+                        {
+                            <li class="chat-user start-private-chat"
+                                data-user-id="@e.Learner.Id"
+                                data-user-name="@e.Learner.FullName">
+                                <img src="@(string.IsNullOrEmpty(e.Learner?.ProfilePicturePath)
+                                                                                                                                                ? "/uploads/profile/default-img.jpg"
+                                                                                                                                                : e.Learner.ProfilePicturePath)"
+                                     title="@e.Learner.FullName" />
+                                <span>@e.Learner.FullName</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+                <!-- Chat box -->
+                <div class="private-chat-box">
+                    <div id="privateChatMessages" class="messages"></div>
+                    <div class="input-area">
+                        <input id="privateChatInput" type="text" placeholder="Nhập tin nhắn riêng..." />
+                        <button id="sendPrivateChatBtn">➤</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- 🔹 Resources -->
         <div class="tab-pane fade" id="resources" role="tabpanel">
@@ -200,7 +326,7 @@
                                         else
                                         {
                                             <a asp-action="DownloadResource" asp-controller="ClassroomInstances"
-                                               asp-route-id="@resource.Id" class="btn btn-sm btn-primary">
+                                                   asp-route-id="@resource.Id" class="btn btn-sm btn-primary">
                                                 Tải File
                                             </a>
                                         }
@@ -337,8 +463,8 @@
                                                 <td>@feedbackStatus</td>
                                                 <td>
                                                     <a asp-controller="Assignments" asp-action="Grade"
-                                                       asp-route-submissionId="@submission.Id"
-                                                       class="btn btn-sm btn-outline-primary">
+                                                           asp-route-submissionId="@submission.Id"
+                                                           class="btn btn-sm btn-outline-primary">
                                                         @actionLabel
                                                     </a>
                                                 </td>
@@ -354,12 +480,9 @@
                 else
                 {
                     <p class="text-muted">Lớp học chưa có bài đánh giá cuối khóa nào.</p>
-                    @if (User.IsInRole("Partner"))
-                    {
-                        <a asp-action="Create" asp-controller="Assignments" asp-route-instanceId="@Model.Instance.Id" class="btn btn-primary mb-3">
-                            <i class="bi bi-plus-circle"></i> Tạo bài tập cuối khóa
+                    <a asp-action="Create" asp-controller="Assignments" asp-route-instanceId="@Model.Instance.Id" class="btn btn-primary mb-3">
+                        <i class="bi bi-plus-circle"></i> Tạo bài tập cuối khóa
                     </a>
-                    }
                 }
             </div>
         </div>
@@ -367,6 +490,7 @@
         <!-- 🔹 Feedback -->
         <div class="tab-pane fade" id="review" role="tabpanel">
             <div class="p-3">
+                <h5 class="fw-bold">Gửi Feedback</h5>
                 @if (User.IsInRole("Partner"))
                 {
                     <h5 class="fw-bold">Danh sách Feedback</h5>
@@ -405,27 +529,25 @@
                         </table>
                     }
                 }
-                else{
-                @if (!Model.HasReviewed)
-                    {
-                        <h5 class="fw-bold">Gửi Feedback</h5>
-                    <form asp-action="SubmitReview" asp-route-instanceId="@Model.Instance.Id" method="post">
-                        <div class="mb-3">
-                            <label for="Rating" class="form-label">Rating (1-5)</label>
-                            <input type="number" class="form-control" name="Rating" min="1" max="5" required />
-                        </div>
-                        <div class="mb-3">
-                            <label for="Comment" class="form-label">Nhận xét</label>
-                            <textarea class="form-control" name="Comment" rows="3"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Gửi</button>
-                    </form>
-                }
                 else
+                {
+                    @if (!Model.HasReviewed)
                     {
-
-                        <h5 class="fw-bold">Gửi Feedback</h5>
-                    <p class="text-success">✅ Bạn đã gửi feedback.</p>
+                        <form asp-action="SubmitReview" asp-route-instanceId="@Model.Instance.Id" method="post">
+                            <div class="mb-3">
+                                <label for="Rating" class="form-label">Rating (1-5)</label>
+                                <input type="number" class="form-control" name="Rating" min="1" max="5" required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="Comment" class="form-label">Nhận xét</label>
+                                <textarea class="form-control" name="Comment" rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Gửi</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <p class="text-success">✅ Bạn đã gửi feedback.</p>
                         <form asp-action="SubmitReview" asp-route-instanceId="@Model.Instance.Id" method="post">
                             <div class="mb-3">
                                 <label class="form-label">Rating (1-5)</label>
@@ -437,7 +559,7 @@
                             </div>
                             <button type="submit" class="btn btn-warning">Cập nhật Feedback</button>
                         </form>
-                   }
+                    }
                 }
             </div>
         </div>
@@ -538,6 +660,139 @@
         color: #fff;
     }
 
+    /* --- Private Chat Wrapper --- */
+    .private-chat-wrapper {
+        display: flex;
+        height: 400px;
+        background-color: #ffffff; /* Nền trắng */
+        color: #1c1e21; /* Chữ đen nhạt */
+        font-family: 'Segoe UI', Arial, sans-serif;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #ddd;
+        margin-bottom: 40px;
+    }
+
+    /* --- Sidebar (User List) --- */
+    .private-chat-users {
+        width: 250px;
+        background-color: #f7f7f7; /* Sidebar xám sáng */
+        border-right: 1px solid #ddd;
+        overflow-y: auto;
+    }
+
+        .private-chat-users ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .private-chat-users .chat-user {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+            .private-chat-users .chat-user img {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                object-fit: cover;
+                margin-right: 10px;
+            }
+
+            .private-chat-users .chat-user:hover,
+            .private-chat-users .chat-user.active {
+                background-color: #e4e6eb; /* Hover giống Messenger */
+                font-weight: 500;
+            }
+
+    /* --- Chat Box --- */
+    .private-chat-box {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background-color: #ffffff; /* Nền trắng */
+    }
+
+        /* --- Messages Area --- */
+        .private-chat-box .messages {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+            /* Bubble chung */
+            .private-chat-box .messages .bubble {
+                max-width: 65%;
+                padding: 8px 12px;
+                border-radius: 18px;
+                word-break: break-word;
+                display: inline-block;
+                position: relative;
+            }
+
+                /* Bubble đối phương */
+                .private-chat-box .messages .bubble.other {
+                    background-color: #e4e6eb;
+                    color: #000;
+                    align-self: flex-start;
+                }
+
+                /* Bubble của mình */
+                .private-chat-box .messages .bubble.own {
+                    background-color: #0084ff;
+                    color: #fff;
+                    align-self: flex-end;
+                }
+
+            /* --- Timestamp --- */
+            .private-chat-box .messages .timestamp {
+                font-size: 12px;
+                color: #555;
+                margin-top: 2px;
+            }
+
+        /* --- Input Area --- */
+        .private-chat-box .input-area {
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            border-top: 1px solid #ddd;
+            background-color: #f7f7f7;
+        }
+
+            .private-chat-box .input-area input {
+                flex: 1;
+                border: 1px solid #ccc;
+                padding: 10px 12px;
+                border-radius: 20px;
+                background-color: #ffffff;
+                color: #000;
+                outline: none;
+                margin-right: 8px;
+                font-size: 14px;
+            }
+
+            .private-chat-box .input-area button {
+                background-color: #0084ff;
+                border: none;
+                padding: 8px 14px;
+                border-radius: 50%;
+                cursor: pointer;
+                color: white;
+                font-size: 16px;
+                transition: background 0.2s;
+            }
+
+                .private-chat-box .input-area button:hover {
+                    background-color: #1877f2;
+                }
 
 </style>
 
@@ -548,28 +803,28 @@
     flatpickr("#newDueDate", { enableTime: true, dateFormat: "d/m/Y H:i" });
 
     window.onload = function () {
-        const hash = window.location.hash;
-        if (hash) {
-            const triggerEl =
-                document.querySelector(`button[data-bs-toggle="tab"][data-bs-target="${hash}"]`) ||
-                document.querySelector(`a[data-bs-toggle="tab"][href="${hash}"]`);
-            if (triggerEl) new bootstrap.Tab(triggerEl).show();
-        }
+    const hash = window.location.hash;
+    if (hash) {
+    const triggerEl =
+    document.querySelector(`button[data-bs-toggle="tab"][data-bs-target="${hash}"]`) ||
+    document.querySelector(`a[data-bs-toggle="tab"][href="${hash}"]`);
+    if (triggerEl) new bootstrap.Tab(triggerEl).show();
+    }
     };
 
     document.addEventListener("DOMContentLoaded", function () {
-        const form = document.getElementById("assignmentForm");
-        if (form) {
-            form.addEventListener("submit", function (e) {
-                const answerText = document.getElementById("answerText")?.value?.trim();
-                const fileInput = document.getElementById("submissionFile");
-                const fileSelected = fileInput?.files?.length > 0;
-                if (!answerText && !fileSelected) {
-                    e.preventDefault();
-                    alert("⛔ Vui lòng gửi bài làm hoặc file bài làm.");
-                }
-            });
-        }
+    const form = document.getElementById("assignmentForm");
+    if (form) {
+    form.addEventListener("submit", function (e) {
+    const answerText = document.getElementById("answerText")?.value?.trim();
+    const fileInput = document.getElementById("submissionFile");
+    const fileSelected = fileInput?.files?.length > 0;
+    if (!answerText && !fileSelected) {
+    e.preventDefault();
+    alert("⛔ Vui lòng gửi bài làm hoặc file bài làm.");
+    }
+    });
+    }
     });
 
     const msgBox = document.getElementById("uploadMessage");
@@ -578,201 +833,119 @@
     const allowedExtensions = [".pdf", ".docx", ".xlsx", ".png", ".jpg", ".jpeg", ".zip"];
 
     function showMessage(text, cssClass) {
-        msgBox.textContent = text;
-        msgBox.className = cssClass + " d-block mt-1";
-        setTimeout(() => { msgBox.textContent = ""; msgBox.className = "d-block mt-1"; }, 3000);
+    msgBox.textContent = text;
+    msgBox.className = cssClass + " d-block mt-1";
+    setTimeout(() => { msgBox.textContent = ""; msgBox.className = "d-block mt-1"; }, 3000);
     }
 
     document.getElementById("fileInput")?.addEventListener("change", function (e) {
-        const newFiles = Array.from(e.target.files);
-        newFiles.forEach(file => {
-            const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
-            if (!allowedExtensions.includes(ext)) showMessage(`File "${file.name}" không hợp lệ!`, "text-danger");
-            else if (fileList.some(f => f.name === file.name && f.size === file.size)) showMessage(`File "${file.name}" đã có!`, "text-warning");
-            else fileList.push(file);
-        });
-        renderPreview();
-        document.getElementById("uploadPreviewContainer").style.display = fileList.length > 0 ? "block" : "none";
-        e.target.value = "";
+    const newFiles = Array.from(e.target.files);
+    newFiles.forEach(file => {
+    const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+    if (!allowedExtensions.includes(ext)) showMessage(`File "${file.name}" không hợp lệ!`, "text-danger");
+    else if (fileList.some(f => f.name === file.name && f.size === file.size)) showMessage(`File "${file.name}" đã có!`, "text-warning");
+    else fileList.push(file);
+    });
+    renderPreview();
+    document.getElementById("uploadPreviewContainer").style.display = fileList.length > 0 ? "block" : "none";
+    e.target.value = "";
     });
 
     function renderPreview() {
-        const preview = document.getElementById("filePreview");
-        preview.innerHTML = "";
-        fileList.forEach((file, index) => {
-            const li = document.createElement("li");
-            li.className = "list-group-item d-flex justify-content-between align-items-center";
-            li.textContent = file.name;
-            const removeBtn = document.createElement("button");
-            removeBtn.className = "btn btn-sm btn-danger";
-            removeBtn.textContent = "X";
-            removeBtn.onclick = () => {
-                fileList.splice(index, 1);
-                renderPreview();
-                document.getElementById("uploadPreviewContainer").style.display = fileList.length > 0 ? "block" : "none";
-            };
-            li.appendChild(removeBtn);
-            preview.appendChild(li);
-        });
+    const preview = document.getElementById("filePreview");
+    preview.innerHTML = "";
+    fileList.forEach((file, index) => {
+    const li = document.createElement("li");
+    li.className = "list-group-item d-flex justify-content-between align-items-center";
+    li.textContent = file.name;
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "btn btn-sm btn-danger";
+    removeBtn.textContent = "X";
+    removeBtn.onclick = () => {
+    fileList.splice(index, 1);
+    renderPreview();
+    document.getElementById("uploadPreviewContainer").style.display = fileList.length > 0 ? "block" : "none";
+    };
+    li.appendChild(removeBtn);
+    preview.appendChild(li);
+    });
     }
 
     async function uploadAllFiles() {
-        if (fileList.length === 0) {
-            showMessage("Không có file nào được chọn!", "text-danger");
-            return;
-        }
-        const formData = new FormData();
-        fileList.forEach(file => formData.append("files", file));
-        formData.append("classroomId", @Model.Instance.Id);
-        try {
-            const response = await fetch("/ClassroomInstances/UploadResource", { method: "POST", body: formData });
-            const result = await response.json();
-            showMessage(result.message, result.success ? "text-success" : "text-danger");
-            if (result.success && result.newResources) {
-                updateLearningMaterials(result.newResources);
-                fileList = [];
-                renderPreview();
-                document.getElementById("uploadPreviewContainer").style.display = "none";
-            }
-        } catch (err) {
-            console.error(err);
-            showMessage("Có lỗi xảy ra khi upload.", "text-danger");
-        }
+    if (fileList.length === 0) {
+    showMessage("Không có file nào được chọn!", "text-danger");
+    return;
+    }
+    const formData = new FormData();
+    fileList.forEach(file => formData.append("files", file));
+    formData.append("classroomId", @Model.Instance.Id);
+    try {
+    const response = await fetch("/ClassroomInstances/UploadResource", { method: "POST", body: formData });
+    const result = await response.json();
+    showMessage(result.message, result.success ? "text-success" : "text-danger");
+    if (result.success && result.newResources) {
+    updateLearningMaterials(result.newResources);
+    fileList = [];
+    renderPreview();
+    document.getElementById("uploadPreviewContainer").style.display = "none";
+    }
+    } catch (err) {
+    console.error(err);
+    showMessage("Có lỗi xảy ra khi upload.", "text-danger");
+    }
     }
 
     function updateLearningMaterials(resources) {
-        const container = document.querySelector("#materialsList tbody");
-        container.innerHTML = "";
-        if (!resources || resources.length === 0) {
-            container.innerHTML = `<tr><td colspan="4" class="text-muted text-center">Chưa có tài liệu nào.</td></tr>`;
-        } else {
-            resources.forEach((r, index) => {
-                const actionBtn = isPartner
-                    ? `<button type="button" class="btn btn-sm btn-danger" onclick="deleteResource(${r.id}, this)"><i class="bi bi-trash"></i> Xóa</button>`
-                    : `<a href="/ClassroomInstances/DownloadResource/${r.id}" class="btn btn-sm btn-primary">Tải File</a>`;
-                container.innerHTML += `
-                    <tr data-id="${r.id}">
-                        <td>${index + 1}</td>
-                        <td>${r.fileName}</td>
-                        <td>${actionBtn}</td>
-                        <td>${r.uploadedAt}</td>
-                    </tr>
-                `;
-            });
-        }
+    const container = document.querySelector("#materialsList tbody");
+    container.innerHTML = "";
+    if (!resources || resources.length === 0) {
+    container.innerHTML = `<tr><td colspan="4" class="text-muted text-center">Chưa có tài liệu nào.</td></tr>`;
+    } else {
+    resources.forEach((r, index) => {
+    const actionBtn = isPartner
+    ? `<button type="button" class="btn btn-sm btn-danger" onclick="deleteResource(${r.id}, this)"><i class="bi bi-trash"></i> Xóa</button>`
+    : `<a href="/ClassroomInstances/DownloadResource/${r.id}" class="btn btn-sm btn-primary">Tải File</a>`;
+    container.innerHTML += `
+    <tr data-id="${r.id}">
+    <td>${index + 1}</td>
+    <td>${r.fileName}</td>
+    <td>${actionBtn}</td>
+    <td>${r.uploadedAt}</td>
+    </tr>
+    `;
+    });
+    }
     }
 
     async function deleteResource(id, btn) {
-        if (!confirm("Bạn có chắc chắn muốn xóa tài liệu này?")) return;
-        try {
-            const response = await fetch("/ClassroomInstances/DeleteResource", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: `id=${id}`
-            });
-            const result = await response.json();
-            showMessage(result.message, result.success ? "text-success" : "text-danger");
-            if (result.success) {
-                btn.closest("tr").remove();
-                const rows = document.querySelectorAll("#materialsList tbody tr");
-                if (rows.length === 0) updateLearningMaterials([]);
-            }
-        } catch (error) {
-            console.error(error);
-            showMessage("Có lỗi xảy ra khi xóa tài liệu.", "text-danger");
-        }
+    if (!confirm("Bạn có chắc chắn muốn xóa tài liệu này?")) return;
+    try {
+    const response = await fetch("/ClassroomInstances/DeleteResource", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `id=${id}`
+    });
+    const result = await response.json();
+    showMessage(result.message, result.success ? "text-success" : "text-danger");
+    if (result.success) {
+    btn.closest("tr").remove();
+    const rows = document.querySelectorAll("#materialsList tbody tr");
+    if (rows.length === 0) updateLearningMaterials([]);
+    }
+    } catch (error) {
+    console.error(error);
+    showMessage("Có lỗi xảy ra khi xóa tài liệu.", "text-danger");
+    }
     }
 </script>
 
 @section Scripts {
-    <!-- Load SignalR -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.11/signalr.min.js"></script>
     <script>
-                document.addEventListener("DOMContentLoaded", () => {
-            const classroomId = @Model.Instance.Id;
-            const userName = '@(ViewBag.CurrentUserName ?? User.Identity.Name)';
-            const currentUserId = '@ViewBag.CurrentUserId';
-
-            const chatBox = document.getElementById("chatMessages");
-            const chatInput = document.getElementById("chatInput");
-            // const sendBtn = document.getElementById("sendChatBtn");
-
-                function escapeHtml(text) {
-            const div = document.createElement("div");
-            div.appendChild(document.createTextNode(text));
-            return div.innerHTML;
-        }
-
-                function appendMessage(user, avatar, message, sentAt, isOwn) {
-            const sideClass = isOwn ? 'chat-bubble own' : 'chat-bubble';
-            const timeHtml = sentAt ? `<small class="text-muted ms-2">(${sentAt})</small>` : '';
-
-            const safeUser = escapeHtml(user);
-            const avatarSrc = avatar && avatar.trim() !== '' ? avatar : '/uploads/profile/default-img.jpg';
-            const safeMessage = escapeHtml(message);
-
-            chatBox.innerHTML += `
-                <div class="${sideClass}" title="${safeUser}">
-                    <img src="${avatarSrc}" alt="avatar" class="chat-avatar" title="${safeUser}" />
-                    <div class="chat-content">${safeMessage} ${timeHtml}</div>
-                </div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-            async function loadMessages() {
-                try {
-                    const res = await fetch(`/ClassroomInstances/GetChatMessages?classroomId=${classroomId}`);
-                    if (res.ok) {
-                        const data = await res.json();
-                             chatBox.innerHTML = data.map(m => `
-                                <div class="${m.isOwn ? 'chat-bubble own' : 'chat-bubble'}" title="${m.userName}">
-                                <img src="${m.avatarUrl}" alt="avatar" class="chat-avatar"/>
-                                <div class="chat-content">
-                                    <span class="chat-message">${m.message}</span>
-                                    <small class="text-muted ms-2">(${m.sentAt})</small>
-                                </div>
-                            </div>`
-                         ).join('');
-                        chatBox.scrollTop = chatBox.scrollHeight;
-                    }
-                } catch (err) {
-                    console.error("LoadMessages error:", err);
-                }
-            }
-
-            const connection = new signalR.HubConnectionBuilder()
-                .withUrl(`/classroomChatHub?classroomId=${classroomId}`)
-                .build();
-
-            connection.on("ReceiveMessage", (user, message, sentAt, senderId, avatarUrl) => {
-                const isOwn = senderId === currentUserId;
-                appendMessage(user, avatarUrl, message, sentAt, isOwn);
-            });
-
-
-            connection.start()
-                .then(() => console.log("✅ SignalR connected"))
-                .catch(err => console.error("❌ SignalR connect error:", err));
-
-            function sendMessage() {
-                const message = chatInput.value.trim();
-                if (!message) return;
-                connection.invoke("SendMessage", classroomId, userName, message)
-                    .then(() => chatInput.value = '')
-                    .catch(err => console.error("❌ SendMessage error:", err));
-            }
-
-            // sendBtn.addEventListener("click", sendMessage);
-            chatInput.addEventListener("keydown", e => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                }
-            });
-
-            // Load ngay khi mở tab Chat
-            document.querySelector('#chat-tab')?.addEventListener('click', loadMessages);
-        });
+        window.classroomId = @Model.Instance.Id;
+        window.currentUserId = '@ViewBag.CurrentUserId';
+        window.currentUserName = '@(ViewBag.CurrentUserName ?? User.Identity.Name)';
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.11/signalr.min.js"></script>
+    <script src="~/js/chat-common.js"></script>
+    <script src="~/js/chat-private.js"></script>
 }
-
